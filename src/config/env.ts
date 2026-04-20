@@ -1,0 +1,20 @@
+import { z } from 'zod';
+
+const envSchema = z.object({
+  EXPO_PUBLIC_FIREBASE_API_KEY: z.string().min(1),
+  EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: z.string().min(1),
+  EXPO_PUBLIC_FIREBASE_PROJECT_ID: z.string().min(1),
+  EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: z.string().min(1),
+  EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: z.string().min(1),
+  EXPO_PUBLIC_FIREBASE_APP_ID: z.string().min(1),
+});
+
+const parsed = envSchema.safeParse(process.env);
+
+if (!parsed.success) {
+  throw new Error(
+    `Variáveis de ambiente inválidas ou ausentes:\n${parsed.error.toString()}`
+  );
+}
+
+export const env = parsed.data;
