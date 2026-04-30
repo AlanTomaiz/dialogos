@@ -16,8 +16,11 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.unicesumar.dialogos",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Este app usa sua localização para exibir eventos próximos a você.",
+        "NSCameraUsageDescription": "Este app usa a câmera para leitura de QR Codes.",
         "ITSAppUsesNonExemptEncryption": false
+      },
+      "runtimeVersion": {
+        "policy": "appVersion"
       }
     },
     "android": {
@@ -29,11 +32,16 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "permissions": [
-        "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.CAMERA",
         "android.permission.POST_NOTIFICATIONS",
         "android.permission.RECEIVE_BOOT_COMPLETED",
-        "android.permission.VIBRATE"
+        "android.permission.VIBRATE",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.VIBRATE",
+        "android.permission.RECORD_AUDIO"
       ],
       "googleServicesFile": "./google-services.json"
     },
@@ -49,6 +57,12 @@
     "plugins": [
       "expo-font",
       [
+        "expo-camera",
+        {
+          "cameraPermission": "Este app usa a câmera para leitura de QR Codes."
+        }
+      ],
+      [
         "expo-notifications",
         {
           "icon": "./assets/icon.png",
@@ -56,6 +70,9 @@
           "sounds": []
         }
       ]
-    ]
+    ],
+    "updates": {
+      "url": "https://u.expo.dev/64bf8404-64b0-4f83-a9d4-1a7f85749026"
+    }
   }
 }

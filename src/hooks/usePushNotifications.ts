@@ -1,5 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import { useEffect, useRef, useState } from 'react';
+import { Platform } from 'react-native';
 import { registerBackgroundNotificationTask } from '../libs/backgroundNotifications';
 import {
     addNotificationReceivedListener,
@@ -24,6 +25,10 @@ export function usePushNotifications(): UsePushNotificationsResult {
   const responseListener = useRef<Notifications.EventSubscription | null>(null);
 
   useEffect(() => {
+    if (Platform.OS === 'web') {
+      return;
+    }
+
     registerBackgroundNotificationTask();
     getExpoPushToken().then(setExpoPushToken);
 

@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────
-//  Dialogos — Design System / Theme
-// ─────────────────────────────────────────────
-
 export const Colors = {
   // Palette
   primaryBackground: '#0B102F',

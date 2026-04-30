@@ -1,20 +1,18 @@
-import { NavigationContainer } from '@react-navigation/native';
-import * as SplashScreen from 'expo-splash-screen';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SplashGate } from './src/components/AppSplashScreen/SplashGate';
 import { useAppFonts } from './src/hooks/useAppFonts';
 import { usePushNotifications } from './src/hooks/usePushNotifications';
-import { BottomTabNavigator } from './src/libs/navigation';
-
-SplashScreen.preventAutoHideAsync();
+import { Home } from './src/screens/Home';
 
 export default function App() {
     const fontsLoaded = useAppFonts();
     usePushNotifications();
 
-    if (!fontsLoaded) return null;
-
     return (
-        <NavigationContainer>
-            <BottomTabNavigator />
-        </NavigationContainer>
+        <SafeAreaProvider>
+            <SplashGate ready={fontsLoaded}>
+                <Home />
+            </SplashGate>
+        </SafeAreaProvider>
     );
 }
