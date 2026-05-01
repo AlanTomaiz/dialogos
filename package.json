@@ -5,11 +5,16 @@
   "scripts": {
     "start": "expo start",
     "web": "expo start --web",
-    "eas:run": "node scripts/eas-run.js"
+    "eas:run": "node scripts/eas-run.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check"
   },
   "dependencies": {
     "@expo-google-fonts/poppins": "^0.4.1",
     "@expo/metro-runtime": "~6.1.2",
+    "@react-native-async-storage/async-storage": "^3.0.2",
     "babel-preset-expo": "~54.0.10",
     "expo": "~54.0.33",
     "expo-camera": "~17.0.10",
@@ -32,7 +37,13 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
-    "typescript": "~5.9.2"
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "prettier": "^3.2.5",
+    "typescript": "^5.8.3"
   },
   "private": true
 }

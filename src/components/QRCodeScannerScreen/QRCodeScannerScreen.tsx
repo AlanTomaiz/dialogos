@@ -10,7 +10,11 @@ type QRCodeScannerScreenProps = {
   onScanned: (value: string) => void;
 };
 
-export function QRCodeScannerScreen({ visible, onClose, onScanned }: QRCodeScannerScreenProps) {
+export function QRCodeScannerScreen({
+  visible,
+  onClose,
+  onScanned
+}: QRCodeScannerScreenProps) {
   const insets = useSafeAreaInsets();
   const [permission, requestPermission] = useCameraPermissions();
   const hasScanned = useRef(false);
@@ -36,10 +40,17 @@ export function QRCodeScannerScreen({ visible, onClose, onScanned }: QRCodeScann
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View style={[styles.container, { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 16 }]}>
+      <View
+        style={[
+          styles.container,
+          { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 16 }
+        ]}
+      >
         <View style={styles.headerCard}>
           <Text style={styles.headerTitle}>Scan QR Code</Text>
-          <Text style={styles.headerSubtitle}>Aponte a camera para o QR Code do evento.</Text>
+          <Text style={styles.headerSubtitle}>
+            Aponte a camera para o QR Code do evento.
+          </Text>
         </View>
 
         <View style={styles.scannerArea}>
@@ -51,8 +62,13 @@ export function QRCodeScannerScreen({ visible, onClose, onScanned }: QRCodeScann
             />
           ) : (
             <View style={styles.permissionFallback}>
-              <Text style={styles.permissionText}>Permita o uso da camera para continuar.</Text>
-              <TouchableOpacity style={styles.permissionButton} onPress={() => requestPermission()}>
+              <Text style={styles.permissionText}>
+                Permita o uso da camera para continuar.
+              </Text>
+              <TouchableOpacity
+                style={styles.permissionButton}
+                onPress={() => requestPermission()}
+              >
                 <Text style={styles.permissionButtonText}>Permitir camera</Text>
               </TouchableOpacity>
             </View>

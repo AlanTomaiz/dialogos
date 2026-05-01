@@ -1,45 +1,46 @@
 import { StyleSheet } from 'react-native';
-import { Radius, Shadow, Spacing, Typography } from '../../theme';
-
-const WHITE = '#FFFFFF';
-const DARK_TEXT = '#111827';
-const GRAY_TEXT = '#6B7280';
+import { Colors, Radius, Shadow, Spacing, Typography } from '../../theme';
 
 export const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    backgroundColor: WHITE,
+    backgroundColor: Colors.WHITE,
     borderRadius: Radius.lg,
     padding: Spacing.base,
-    ...Shadow.sm,
+    ...Shadow.sm
   },
   content: {
-    flex: 1,
+    flex: 1
   },
   title: {
     fontFamily: Typography.family.bold,
     fontSize: Typography.size.base,
-    color: DARK_TEXT,
-    marginBottom: Spacing.xxs,
+    color: Colors.TITLE,
+    marginBottom: Spacing.xxs
   },
   time: {
     fontFamily: Typography.family.regular,
     fontSize: Typography.size.sm,
-    color: GRAY_TEXT,
+    color: Colors.MUTED
   },
   duration: {
     fontFamily: Typography.family.regular,
     fontSize: Typography.size.sm,
-    color: GRAY_TEXT,
+    color: Colors.MUTED
   },
   badge: {
     width: 22,
     height: 22,
     borderRadius: Radius.sm,
     borderWidth: 2,
+    borderColor: Colors.BORDER,
     marginLeft: Spacing.md,
-    marginTop: Spacing.xxs,
+    marginTop: Spacing.xxs
   },
+  badgeChecked: {
+    backgroundColor: Colors.PRIMARY,
+    borderColor: Colors.PRIMARY
+  }
 });

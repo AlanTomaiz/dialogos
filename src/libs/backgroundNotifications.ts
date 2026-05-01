@@ -9,8 +9,8 @@ export async function registerBackgroundNotificationTask(): Promise<void> {
         shouldPlaySound: true,
         shouldSetBadge: true,
         shouldShowBanner: true,
-        shouldShowList: true,
+        shouldShowList: true
       };
-    },
+    }
   });
 }

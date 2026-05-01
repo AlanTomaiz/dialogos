@@ -2,11 +2,13 @@ import * as Notifications from 'expo-notifications';
 import { useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import { registerBackgroundNotificationTask } from '../libs/backgroundNotifications';
+import { auth } from '../libs/firebase';
 import {
-    addNotificationReceivedListener,
-    addNotificationResponseListener,
-    getExpoPushToken,
+  addNotificationReceivedListener,
+  addNotificationResponseListener,
+  getExpoPushToken
 } from '../libs/notifications';
+import { saveUserPushToken } from '../services/notificationService';
 
 type UsePushNotificationsResult = {
   expoPushToken: string | null;
@@ -21,7 +23,9 @@ export function usePushNotifications(): UsePushNotificationsResult {
   const [lastResponse, setLastResponse] =
     useState<Notifications.NotificationResponse | null>(null);
 
-  const notificationListener = useRef<Notifications.EventSubscription | null>(null);
+  const notificationListener = useRef<Notifications.EventSubscription | null>(
+    null
+  );
   const responseListener = useRef<Notifications.EventSubscription | null>(null);
 
   useEffect(() => {
@@ -30,7 +34,13 @@ export function usePushNotifications(): UsePushNotificationsResult {
     }
 
     registerBackgroundNotificationTask();
-    getExpoPushToken().then(setExpoPushToken);
+    getExpoPushToken().then((token) => {
+      setExpoPushToken(token);
+      const uid = auth.currentUser?.uid;
+      if (token && uid) {
+        saveUserPushToken(uid, token).catch(() => {});
+      }
+    });
 
     notificationListener.current = addNotificationReceivedListener(
       (notification) => setLastNotification(notification)

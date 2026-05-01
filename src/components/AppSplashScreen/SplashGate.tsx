@@ -2,6 +2,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import AppSplashScreen from './AppSplashScreen';
+import { styles } from './style';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -33,5 +34,5 @@ export function SplashGate({ ready, children }: SplashGateProps) {
     return <AppSplashScreen />;
   }
 
-  return <View style={{ flex: 1 }}>{children}</View>;
+  return <View style={styles.gateContainer}>{children}</View>;
 }

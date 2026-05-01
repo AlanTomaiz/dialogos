@@ -7,5 +7,5 @@ export const FIREBASE_CONFIG: FirebaseOptions = {
   projectId: env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
   storageBucket: env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: env.EXPO_PUBLIC_FIREBASE_APP_ID,
+  appId: env.EXPO_PUBLIC_FIREBASE_APP_ID
 };

@@ -1,4 +1,5 @@
-import { Image, StyleSheet, View } from 'react-native';
+import { Image, View } from 'react-native';
+import { styles } from './style';
 
 export default function AppSplashScreen() {
   return (
@@ -11,16 +12,3 @@ export default function AppSplashScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FDB640',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  image: {
-    width: '80%',
-    height: '40%',
-  },
-});

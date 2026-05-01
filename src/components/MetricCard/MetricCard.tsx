@@ -1,5 +1,6 @@
 import { Check } from 'lucide-react-native';
 import { Text, View, ViewStyle } from 'react-native';
+import { Colors } from '../../theme';
 import { styles } from './style';
 
 export type MetricCardProps = {
@@ -17,9 +18,11 @@ export function MetricCard({
   status,
   isComplete = false,
   progress,
-  backgroundColor,
+  backgroundColor
 }: MetricCardProps) {
-  const fillStyle: ViewStyle = { width: `${Math.round(progress * 100)}%` as ViewStyle['width'] };
+  const fillStyle: ViewStyle = {
+    width: `${Math.round(progress * 100)}%` as ViewStyle['width']
+  };
 
   return (
     <View style={[styles.card, { backgroundColor }]}>
@@ -30,8 +33,13 @@ export function MetricCard({
           </View>
           <Text style={styles.label}>{label}</Text>
         </View>
-        <View style={[styles.badge, isComplete ? styles.badgeFilled : styles.badgeEmpty]}>
-          {isComplete && <Check size={9} color="#fff" strokeWidth={3} />}
+        <View
+          style={[
+            styles.badge,
+            isComplete ? styles.badgeFilled : styles.badgeEmpty
+          ]}
+        >
+          {isComplete && <Check size={9} color={Colors.WHITE} strokeWidth={3} />}
         </View>
       </View>
       <Text style={styles.value}>{status}</Text>

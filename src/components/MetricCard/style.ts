@@ -1,79 +1,69 @@
 import { StyleSheet } from 'react-native';
-import { Radius, Spacing, Typography } from '../../theme';
-
-const WHITE = '#FFFFFF';
+import { Colors, Radius, Spacing, Typography } from '../../theme';
 
 export const styles = StyleSheet.create({
   card: {
     flex: 1,
     borderRadius: Radius.lg,
-    padding: Spacing.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
-    elevation: 2,
+    padding: Spacing.md
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.sm
   },
   labelRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.xs,
+    gap: Spacing.xs
   },
   labelIcon: {
     width: 16,
     height: 16,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255,255,255,0.3)',
+    borderRadius: Radius.sm,
+    backgroundColor: Colors.WHITE_ALPHA_30,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   labelIconText: {
     fontFamily: Typography.family.bold,
-    fontSize: 9,
-    color: WHITE,
+    fontSize: Typography.size.xs,
+    color: Colors.WHITE
   },
   label: {
     fontFamily: Typography.family.semiBold,
     fontSize: Typography.size.sm,
-    color: 'rgba(255,255,255,0.9)',
+    color: Colors.WHITE_ALPHA_90
   },
   badge: {
     width: 18,
     height: 18,
-    borderRadius: 9,
+    borderRadius: Radius.sm,
     alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.8)',
+    justifyContent: 'center'
   },
   badgeFilled: {
-    backgroundColor: '#22C55E',
-    borderColor: '#22C55E',
+    backgroundColor: Colors.SUCCESS_GREEN
   },
   badgeEmpty: {
-    backgroundColor: 'transparent',
+    backgroundColor: Colors.TRANSPARENT
   },
   value: {
     fontFamily: Typography.family.bold,
     fontSize: Typography.size.base,
-    color: WHITE,
-    marginBottom: Spacing.sm,
+    color: Colors.WHITE,
+    marginBottom: Spacing.sm
   },
   progressTrack: {
     height: 4,
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    borderRadius: 999,
-    overflow: 'hidden',
+    backgroundColor: Colors.WHITE_ALPHA_30,
+    borderRadius: Radius.full,
+    overflow: 'hidden'
   },
   progressFill: {
     height: 4,
-    backgroundColor: 'rgba(255,255,255,0.85)',
-    borderRadius: 999,
-  },
+    backgroundColor: Colors.WHITE_ALPHA_85,
+    borderRadius: Radius.full
+  }
 });

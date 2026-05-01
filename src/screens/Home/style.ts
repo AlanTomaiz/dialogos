@@ -1,16 +1,10 @@
 import { StyleSheet } from 'react-native';
-import { Shadow, Spacing, Typography } from '../../theme';
-
-const BACKGROUND = '#F5F5F7';
-const WHITE = '#FFFFFF';
-const DARK_TEXT = '#111827';
-const DIVIDER = '#E5E7EB';
-const FAB_COLOR = '#F5952A';
+import { Colors, Radius, Spacing, Typography } from '../../theme';
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BACKGROUND,
+    backgroundColor: Colors.BG
   },
   header: {
     flexDirection: 'row',
@@ -18,38 +12,35 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.md,
-    backgroundColor: WHITE,
-    borderBottomWidth: 1,
-    borderBottomColor: DIVIDER,
+    backgroundColor: Colors.WHITE
   },
   headerTitle: {
     fontFamily: Typography.family.bold,
     fontSize: Typography.size.xl,
-    color: DARK_TEXT,
+    color: Colors.TITLE
   },
   metricRowWrapper: {
-    flexDirection: 'row',
+    flexDirection: 'row'
   },
   metricRow: {
     flex: 1,
     flexDirection: 'row',
     gap: Spacing.md,
     paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.base,
+    paddingVertical: Spacing.base
   },
   agendaList: {
     gap: Spacing.md,
-    padding: Spacing.base,
+    padding: Spacing.base
   },
   fab: {
     position: 'absolute',
     right: Spacing.base,
     width: 56,
     height: 56,
-    borderRadius: 28,
-    backgroundColor: FAB_COLOR,
+    borderRadius: Radius.xxl,
+    backgroundColor: Colors.PRIMARY,
     alignItems: 'center',
-    justifyContent: 'center',
-    ...Shadow.lg,
-  },
+    justifyContent: 'center'
+  }
 });

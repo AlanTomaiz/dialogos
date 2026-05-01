@@ -1,5 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+import { Colors } from '../theme';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -7,8 +8,8 @@ Notifications.setNotificationHandler({
     shouldPlaySound: true,
     shouldSetBadge: true,
     shouldShowBanner: true,
-    shouldShowList: true,
-  }),
+    shouldShowList: true
+  })
 });
 
 export async function requestNotificationPermission(): Promise<boolean> {
@@ -20,8 +21,8 @@ export async function requestNotificationPermission(): Promise<boolean> {
     ios: {
       allowAlert: true,
       allowBadge: true,
-      allowSound: true,
-    },
+      allowSound: true
+    }
   });
 
   return status === 'granted';
@@ -36,7 +37,7 @@ export async function getExpoPushToken(): Promise<string | null> {
       name: 'default',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#A5B2E0',
+      lightColor: Colors.NOTIFICATION_LIGHT
     });
   }
 
