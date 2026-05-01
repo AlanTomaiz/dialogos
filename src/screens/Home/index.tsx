@@ -10,8 +10,10 @@ import type { EventCreateInput } from '../../components/EventCreateModal/EventCr
 import { EventDetailModal } from '../../components/EventDetailModal/EventDetailModal';
 import { EventQRCodeModal } from '../../components/EventQRCodeModal/EventQRCodeModal';
 import { QRCodeScannerScreen } from '../../components/QRCodeScannerScreen/QRCodeScannerScreen';
+import { MODAL_NAMESPACE } from '../../config/modals';
 import { useDialEvents } from '../../hooks/useDialEvents';
 import { useLoggedUserProfile } from '../../hooks/useLoggedUserProfile';
+import { useModalManager } from '../../hooks/useModalManager';
 import { useToast } from '../../hooks/useToast';
 import { auth } from '../../libs/firebase';
 import { broadcastNewEventNotification } from '../../services/notificationService';
@@ -23,10 +25,9 @@ export function Home() {
   const insets = useSafeAreaInsets();
   const toast = useToast();
   const bottomOffset = insets.bottom;
+  const { openModal, closeModal, isOpen } = useModalManager();
 
   const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
-  const [isScannerVisible, setIsScannerVisible] = useState(false);
-  const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [qrCodeEvent, setQrCodeEvent] = useState<{
     id: string;
     title: string;
@@ -46,7 +47,8 @@ export function Home() {
 
   function handleConfirmPresence(): void {
     setSelectedEvent(null);
-    setIsScannerVisible(true);
+    closeModal(MODAL_NAMESPACE.EVENT_DETAIL);
+    openModal(MODAL_NAMESPACE.EVENT_SCANNER);
   }
 
   async function handleCreateEvent(input: EventCreateInput): Promise<void> {
@@ -78,10 +80,10 @@ export function Home() {
 
       toast.show('Evento criado com sucesso.', 'success');
       broadcastNewEventNotification(input.title.trim()).catch(() => {});
-      setIsCreateModalVisible(false);
+      closeModal(MODAL_NAMESPACE.EVENT_CREATE);
       setQrCodeEvent({ id: eventId, title: input.title.trim() });
+      openModal(MODAL_NAMESPACE.EVENT_QR_CODE);
     } catch (error) {
-      console.log('[handleCreateEvent]', error);
       const message =
         error instanceof Error
           ? error.message
@@ -128,41 +130,50 @@ export function Home() {
             <EventCard
               key={`${event.title}-${event.createdAt}`}
               {...event}
-              onPress={() => setSelectedEvent(event)}
+              onPress={() => {
+                setSelectedEvent(event);
+                openModal(MODAL_NAMESPACE.EVENT_DETAIL);
+              }}
             />
           ))}
         </View>
       </ScrollView>
 
       <EventCreateModal
-        visible={isCreateModalVisible}
-        onClose={() => setIsCreateModalVisible(false)}
+        visible={isOpen(MODAL_NAMESPACE.EVENT_CREATE)}
+        onClose={() => closeModal(MODAL_NAMESPACE.EVENT_CREATE)}
         onSubmit={handleCreateEvent}
       />
 
       <EventQRCodeModal
-        visible={qrCodeEvent !== null}
+        visible={isOpen(MODAL_NAMESPACE.EVENT_QR_CODE)}
         eventId={qrCodeEvent?.id ?? ''}
         eventTitle={qrCodeEvent?.title ?? ''}
-        onClose={() => setQrCodeEvent(null)}
+        onClose={() => {
+          setQrCodeEvent(null);
+          closeModal(MODAL_NAMESPACE.EVENT_QR_CODE);
+        }}
       />
 
       <EventDetailModal
         event={selectedEvent}
-        visible={selectedEvent !== null}
-        onClose={() => setSelectedEvent(null)}
+        visible={isOpen(MODAL_NAMESPACE.EVENT_DETAIL)}
+        onClose={() => {
+          setSelectedEvent(null);
+          closeModal(MODAL_NAMESPACE.EVENT_DETAIL);
+        }}
         onConfirmPresence={handleConfirmPresence}
       />
 
       <QRCodeScannerScreen
-        visible={isScannerVisible}
-        onClose={() => setIsScannerVisible(false)}
-        onScanned={() => setIsScannerVisible(false)}
+        visible={isOpen(MODAL_NAMESPACE.EVENT_SCANNER)}
+        onClose={() => closeModal(MODAL_NAMESPACE.EVENT_SCANNER)}
+        onScanned={() => closeModal(MODAL_NAMESPACE.EVENT_SCANNER)}
       />
 
       <TouchableOpacity
         style={[styles.fab, { bottom: bottomOffset + Spacing.base }]}
-        onPress={() => setIsCreateModalVisible(true)}
+        onPress={() => openModal(MODAL_NAMESPACE.EVENT_CREATE)}
       >
         <Plus size={26} color={Colors.WHITE} strokeWidth={2.5} />
       </TouchableOpacity>
