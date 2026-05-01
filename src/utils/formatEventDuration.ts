@@ -1,4 +1,7 @@
-export function formatEventDuration(timeStart: string, timeEnd: string): string {
+export function formatEventDuration(
+  timeStart: string,
+  timeEnd: string
+): string {
   const [startH = 0, startM = 0] = timeStart.split(':').map(Number);
   const [endH = 0, endM = 0] = timeEnd.split(':').map(Number);
   const totalMinutes = endH * 60 + endM - (startH * 60 + startM);

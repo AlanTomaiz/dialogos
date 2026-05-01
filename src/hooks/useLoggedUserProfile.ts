@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { auth } from '../libs/firebase';
 import { getCurrentDialUserProfile } from '../services/authService';
 import {
-    cacheUserProfile,
-    getCachedUserProfile
+  cacheUserProfile,
+  getCachedUserProfile
 } from '../utils/userProfileStorage';
 
 type LoggedUserProfile = {

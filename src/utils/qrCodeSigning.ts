@@ -1,0 +1,97 @@
+import type { SignedQRCodePayload } from '../components/EventQRCodeModal/EventQRCodeModal.type';
+import {
+  QR_CODE_TTL_MS,
+  QR_PAYLOAD_VERSION,
+  QR_SIGNING_SECRET
+} from '../config/qr';
+
+type VerifyResult =
+  | { valid: true; eventId: string }
+  | { valid: false; error: string };
+
+function signingMessage(v: number, eventId: string, exp: number): string {
+  return `${v}|${eventId}|${exp}`;
+}
+
+async function hmacSha256Hex(secret: string, message: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+
+  const signature = await crypto.subtle.sign(
+    'HMAC',
+    keyMaterial,
+    encoder.encode(message)
+  );
+
+  return Array.from(new Uint8Array(signature))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+export async function buildSignedQRPayload(eventId: string): Promise<string> {
+  const exp = Date.now() + QR_CODE_TTL_MS;
+  const message = signingMessage(QR_PAYLOAD_VERSION, eventId, exp);
+  const sig = await hmacSha256Hex(QR_SIGNING_SECRET, message);
+
+  const payload: SignedQRCodePayload = {
+    v: QR_PAYLOAD_VERSION,
+    eventId,
+    exp,
+    sig
+  };
+
+  return JSON.stringify(payload);
+}
+
+export async function verifyQRPayload(raw: string): Promise<VerifyResult> {
+  let parsed: unknown;
+
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return { valid: false, error: 'QR Code inválido.' };
+  }
+
+  if (
+    typeof parsed !== 'object' ||
+    parsed === null ||
+    !('v' in parsed) ||
+    !('eventId' in parsed) ||
+    !('exp' in parsed) ||
+    !('sig' in parsed)
+  ) {
+    return { valid: false, error: 'QR Code inválido.' };
+  }
+
+  const { v, eventId, exp, sig } = parsed as Record<string, unknown>;
+
+  if (
+    v !== QR_PAYLOAD_VERSION ||
+    typeof eventId !== 'string' ||
+    typeof exp !== 'number' ||
+    typeof sig !== 'string'
+  ) {
+    return { valid: false, error: 'QR Code inválido ou versão não suportada.' };
+  }
+
+  if (Date.now() > exp) {
+    return { valid: false, error: 'QR Code expirado.' };
+  }
+
+  const expectedSig = await hmacSha256Hex(
+    QR_SIGNING_SECRET,
+    signingMessage(QR_PAYLOAD_VERSION, eventId, exp)
+  );
+
+  if (sig !== expectedSig) {
+    return { valid: false, error: 'QR Code com assinatura inválida.' };
+  }
+
+  return { valid: true, eventId };
+}

@@ -15,10 +15,11 @@ import { useDialEvents } from '../../hooks/useDialEvents';
 import { useLoggedUserProfile } from '../../hooks/useLoggedUserProfile';
 import { useModalManager } from '../../hooks/useModalManager';
 import { useToast } from '../../hooks/useToast';
-import { auth } from '../../libs/firebase';
 import { broadcastNewEventNotification } from '../../services/notificationService';
 import { Colors, Spacing } from '../../theme';
 import { formatEventDuration } from '../../utils/formatEventDuration';
+import { isWithinEventTimeWindow } from '../../utils/parseEventTimeRange';
+import { verifyQRPayload } from '../../utils/qrCodeSigning';
 import { styles } from './style';
 
 export function Home() {
@@ -28,6 +29,7 @@ export function Home() {
   const { openModal, closeModal, isOpen } = useModalManager();
 
   const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
+
   const [qrCodeEvent, setQrCodeEvent] = useState<{
     id: string;
     title: string;
@@ -43,12 +45,63 @@ export function Home() {
     toast.show('Falha ao carregar eventos do Firebase.', 'error');
   }, [toast]);
 
-  const { events, createEvent } = useDialEvents(handleEventsLoadError);
+  const { events, checkedEventIds, createEvent, registerEventParticipant } =
+    useDialEvents(handleEventsLoadError);
 
   function handleConfirmPresence(): void {
+    if (!selectedEvent) return;
+
+    const isValidEvent = !isWithinEventTimeWindow(
+      selectedEvent.timeRange,
+      selectedEvent.createdAt
+    );
+
+    if (!isValidEvent) {
+      toast.show('Evento fora do horário permitido.', 'error');
+      return;
+    }
+
     setSelectedEvent(null);
     closeModal(MODAL_NAMESPACE.EVENT_DETAIL);
     openModal(MODAL_NAMESPACE.EVENT_SCANNER);
+  }
+
+  async function handleScanned(rawValue: string): Promise<void> {
+    // closeModal(MODAL_NAMESPACE.EVENT_SCANNER);
+
+    if (!selectedEvent) return;
+
+    const verification = await verifyQRPayload(rawValue);
+
+    if (!verification.valid) {
+      toast.show(verification.error, 'error');
+
+      setSelectedEvent(null);
+      closeModal(MODAL_NAMESPACE.EVENT_SCANNER);
+      return;
+    }
+
+    if (verification.eventId !== selectedEvent.id) {
+      toast.show('QR Code pertence a outro evento.', 'error');
+
+      setSelectedEvent(null);
+      closeModal(MODAL_NAMESPACE.EVENT_SCANNER);
+      return;
+    }
+
+    const result = await registerEventParticipant(selectedEvent.id);
+    setSelectedEvent(null);
+
+    if (!result.success) {
+      toast.show(result.error, 'error');
+      return;
+    }
+
+    if (result.alreadyRegistered) {
+      toast.show('Presença já registrada.', 'success');
+    } else {
+      toast.show('Presença confirmada!', 'success');
+    }
   }
 
   async function handleCreateEvent(input: EventCreateInput): Promise<void> {
@@ -59,9 +112,7 @@ export function Home() {
       return;
     }
 
-    const creatorUid = loggedUserUid || auth.currentUser?.uid || '';
-
-    if (!creatorUid) {
+    if (!loggedUserUid) {
       toast.show('Usuario logado nao identificado.', 'error');
       return;
     }
@@ -72,7 +123,7 @@ export function Home() {
         timeRange: `${input.timeStart} - ${input.timeEnd}`,
         duration: formatEventDuration(input.timeStart, input.timeEnd),
         location: input.location.trim(),
-        creatorUid,
+        creatorUid: loggedUserUid,
         creatorName: loggedUserName.trim(),
         creatorPhotoUrl: loggedUserPhotoUrl,
         description: input.description.trim()
@@ -130,6 +181,7 @@ export function Home() {
             <EventCard
               key={`${event.title}-${event.createdAt}`}
               {...event}
+              checked={checkedEventIds.has(event.id)}
               onPress={() => {
                 setSelectedEvent(event);
                 openModal(MODAL_NAMESPACE.EVENT_DETAIL);
@@ -168,7 +220,7 @@ export function Home() {
       <QRCodeScannerScreen
         visible={isOpen(MODAL_NAMESPACE.EVENT_SCANNER)}
         onClose={() => closeModal(MODAL_NAMESPACE.EVENT_SCANNER)}
-        onScanned={() => closeModal(MODAL_NAMESPACE.EVENT_SCANNER)}
+        onScanned={handleScanned}
       />
 
       <TouchableOpacity

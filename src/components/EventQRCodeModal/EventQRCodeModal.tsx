@@ -1,4 +1,5 @@
 import { Share2 } from 'lucide-react-native';
+import { useEffect, useState } from 'react';
 import { Modal, Text, TouchableOpacity, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,8 +15,23 @@ export function EventQRCodeModal({
   onClose
 }: EventQRCodeModalProps) {
   const insets = useSafeAreaInsets();
+  const [qrValue, setQrValue] = useState<string | null>(null);
 
-  const qrValue = buildQRCodeValue({ eventId });
+  useEffect(() => {
+    if (!visible || !eventId) {
+      setQrValue(null);
+      return;
+    }
+
+    let cancelled = false;
+    buildQRCodeValue(eventId).then((value) => {
+      if (!cancelled) setQrValue(value);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [visible, eventId]);
 
   async function handleShare(): Promise<void> {
     await shareEventQRCode(eventTitle, eventId);
@@ -40,12 +56,14 @@ export function EventQRCodeModal({
           <Text style={styles.eventName}>{eventTitle}</Text>
 
           <View style={styles.qrWrapper}>
-            <QRCode
-              value={qrValue}
-              size={200}
-              color={Colors.TITLE}
-              backgroundColor={Colors.WHITE}
-            />
+            {qrValue ? (
+              <QRCode
+                value={qrValue}
+                size={200}
+                color={Colors.TITLE}
+                backgroundColor={Colors.WHITE}
+              />
+            ) : null}
           </View>
 
           <TouchableOpacity style={styles.shareButton} onPress={handleShare}>

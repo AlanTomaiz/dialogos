@@ -24,7 +24,9 @@ export default function App() {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        setErrorMsg('Permissão de localização negada. Por favor, habilite nas configurações do dispositivo.');
+        setErrorMsg(
+          'Permissão de localização negada. Por favor, habilite nas configurações do dispositivo.'
+        );
         setLoading(false);
         return;
       }
@@ -33,7 +35,7 @@ export default function App() {
         {
           accuracy: Location.Accuracy.High,
           distanceInterval: 10,
-          timeInterval: 1000,
+          timeInterval: 1000
         },
         (loc) => {
           setLocation(loc.coords);
@@ -82,13 +84,17 @@ export default function App() {
           {location.accuracy !== null && (
             <View style={styles.row}>
               <Text style={styles.label}>Precisão</Text>
-              <Text style={styles.value}>± {location.accuracy.toFixed(1)} m</Text>
+              <Text style={styles.value}>
+                ± {location.accuracy.toFixed(1)} m
+              </Text>
             </View>
           )}
           {location.speed !== null && location.speed > 0 && (
             <View style={styles.row}>
               <Text style={styles.label}>Velocidade</Text>
-              <Text style={styles.value}>{(location.speed * 3.6).toFixed(1)} km/h</Text>
+              <Text style={styles.value}>
+                {(location.speed * 3.6).toFixed(1)} km/h
+              </Text>
             </View>
           )}
         </View>
@@ -114,20 +120,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F7FA',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 24
   },
   appTitle: {
     fontSize: 32,
     fontWeight: '700',
     color: '#1A1A2E',
     letterSpacing: 1,
-    marginBottom: 4,
+    marginBottom: 4
   },
   appSubtitle: {
     fontSize: 14,
     color: '#6B7280',
     marginBottom: 40,
-    letterSpacing: 0.5,
+    letterSpacing: 0.5
   },
   locationCard: {
     backgroundColor: '#FFFFFF',
@@ -138,14 +144,14 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: 4
   },
   title: {
     fontSize: 18,
     fontWeight: '600',
     color: '#1A1A2E',
     marginBottom: 16,
-    textAlign: 'center',
+    textAlign: 'center'
   },
   row: {
     flexDirection: 'row',
@@ -153,28 +159,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: '#F0F0F0'
   },
   label: {
     fontSize: 14,
     color: '#6B7280',
-    fontWeight: '500',
+    fontWeight: '500'
   },
   value: {
     fontSize: 14,
     color: '#1A1A2E',
     fontWeight: '600',
-    fontVariant: ['tabular-nums'],
+    fontVariant: ['tabular-nums']
   },
   loadingText: {
     marginTop: 12,
     fontSize: 15,
-    color: '#6B7280',
+    color: '#6B7280'
   },
   errorText: {
     fontSize: 15,
     color: '#EF4444',
     textAlign: 'center',
-    lineHeight: 22,
-  },
+    lineHeight: 22
+  }
 });

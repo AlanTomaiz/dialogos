@@ -1,7 +1,10 @@
 import { Clock, MapPin } from 'lucide-react-native';
 import { Image, Modal, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useDialEvents } from '../../hooks/useDialEvents';
 import { Colors } from '../../theme';
+import { formatRelativeDate } from '../../utils/formatRelativeDate';
+import { getInitialsFromName } from '../../utils/getInitialsFromName';
 import type { EventData } from '../EventCard/EventCard';
 import { styles } from './style';
 
@@ -11,73 +14,6 @@ type EventDetailModalProps = {
   onClose: () => void;
   onConfirmPresence: () => void;
 };
-
-function getInitialsFromName(name: string): string {
-  const words = name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
-
-  if (words.length === 0) {
-    return 'US';
-  }
-
-  if (words.length === 1) {
-    return words[0].slice(0, 2).toUpperCase();
-  }
-
-  return `${words[0][0]}${words[words.length - 1][0]}`.toUpperCase();
-}
-
-function formatCreatedAtLabel(createdAt: string): string {
-  const createdTime = new Date(createdAt).getTime();
-
-  if (Number.isNaN(createdTime)) {
-    return createdAt;
-  }
-
-  const diffInSeconds = Math.max(
-    0,
-    Math.floor((Date.now() - createdTime) / 1000)
-  );
-
-  if (diffInSeconds <= 60) {
-    return 'Agora mesmo';
-  }
-
-  const diffInMinutes = Math.floor(diffInSeconds / 60);
-
-  if (diffInMinutes < 60) {
-    return `Há ${diffInMinutes}min`;
-  }
-
-  const diffInHours = Math.floor(diffInMinutes / 60);
-
-  if (diffInHours < 24) {
-    return `Há ${diffInHours}hr`;
-  }
-
-  const diffInDays = Math.floor(diffInHours / 24);
-
-  if (diffInDays < 7) {
-    return `Há ${diffInDays} ${diffInDays === 1 ? 'dia' : 'dias'}`;
-  }
-
-  const diffInWeeks = Math.floor(diffInDays / 7);
-
-  if (diffInWeeks < 4) {
-    return `Há ${diffInWeeks} ${diffInWeeks === 1 ? 'semana' : 'semanas'}`;
-  }
-
-  const diffInMonths = Math.floor(diffInDays / 30);
-
-  if (diffInMonths < 12) {
-    return `Há ${diffInMonths} ${diffInMonths === 1 ? 'mês' : 'meses'}`;
-  }
-
-  const diffInYears = Math.floor(diffInDays / 365);
-  return `Há ${diffInYears} ${diffInYears === 1 ? 'ano' : 'anos'}`;
-}
 
 export function EventDetailModal({
   event,
@@ -89,9 +25,13 @@ export function EventDetailModal({
 
   if (!event) return null;
 
-  const avatarInitials = event.creatorInitials || getInitialsFromName(event.creatorName);
+  const avatarInitials =
+    event.creatorInitials || getInitialsFromName(event.creatorName);
   const hasCreatorPhoto = Boolean(event.creatorPhotoUrl);
-  const createdAtLabel = formatCreatedAtLabel(event.createdAt);
+  const createdAtLabel = formatRelativeDate(event.createdAt);
+
+  const { checkedEventIds } = useDialEvents();
+  const isChecked = checkedEventIds.has(event.id);
 
   return (
     <Modal
@@ -142,12 +82,14 @@ export function EventDetailModal({
             <Text style={styles.detailText}>{event.location}</Text>
           </View>
 
-          <TouchableOpacity
-            style={styles.attendButton}
-            onPress={onConfirmPresence}
-          >
-            <Text style={styles.attendButtonText}>Marcar presença</Text>
-          </TouchableOpacity>
+          {!isChecked && (
+            <TouchableOpacity
+              style={styles.attendButton}
+              onPress={onConfirmPresence}
+            >
+              <Text style={styles.attendButtonText}>Registrar presença</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </Modal>

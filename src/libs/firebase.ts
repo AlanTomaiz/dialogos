@@ -1,26 +1,33 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { getApp, getApps, initializeApp, type FirebaseError } from 'firebase/app';
 import {
-	createUserWithEmailAndPassword,
-	getAuth,
-	initializeAuth,
-	signInWithEmailAndPassword,
-	type Auth
+  getApp,
+  getApps,
+  initializeApp,
+  type FirebaseError
+} from 'firebase/app';
+import {
+  createUserWithEmailAndPassword,
+  getAuth,
+  initializeAuth,
+  signInWithEmailAndPassword,
+  type Auth
 } from 'firebase/auth';
 import {
-	addDoc,
-	collection,
-	doc,
-	getDoc,
-	getDocs,
-	getFirestore,
-	onSnapshot,
-	orderBy,
-	query,
-	serverTimestamp,
-	setDoc,
-	updateDoc,
-	type Unsubscribe
+  addDoc,
+  collection,
+  collectionGroup,
+  doc,
+  getDoc,
+  getDocs,
+  getFirestore,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
+  type Unsubscribe
 } from 'firebase/firestore';
 import { Platform } from 'react-native';
 import { FIREBASE_CONFIG } from '../config/firebase';
@@ -49,19 +56,21 @@ export const auth = createAuthInstance();
 export const firestore = getFirestore(app);
 
 export {
-	addDoc,
-	collection,
-	createUserWithEmailAndPassword,
-	doc,
-	getDoc,
-	getDocs,
-	onSnapshot,
-	orderBy,
-	query,
-	serverTimestamp,
-	setDoc,
-	signInWithEmailAndPassword,
-	updateDoc
+  addDoc,
+  collection,
+  collectionGroup,
+  createUserWithEmailAndPassword,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc,
+  signInWithEmailAndPassword,
+  updateDoc,
+  where
 };
-export type { FirebaseError, Unsubscribe };
 
+export type { FirebaseError, Unsubscribe };

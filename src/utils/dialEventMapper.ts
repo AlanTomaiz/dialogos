@@ -10,7 +10,6 @@ export type DialEventDoc = {
   creatorName?: string;
   creatorPhotoUrl?: string | null;
   description?: string;
-  checked?: boolean;
   createdAt?: Timestamp | string | null;
 };
 
@@ -40,7 +39,6 @@ export function mapDialEventToEventData(
     creatorName: data.creatorName?.trim() || 'Usuario',
     creatorPhotoUrl: data.creatorPhotoUrl ?? null,
     description: data.description?.trim() || 'Sem descricao.',
-    createdAt: getCreatedAtIso(data.createdAt),
-    checked: data.checked ?? false
+    createdAt: getCreatedAtIso(data.createdAt)
   };
 }

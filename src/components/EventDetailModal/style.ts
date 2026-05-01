@@ -99,5 +99,9 @@ export const styles = StyleSheet.create({
     fontFamily: Typography.family.bold,
     fontSize: Typography.size.base,
     color: Colors.WHITE
+  },
+  attendButtonDisabled: {
+    backgroundColor: Colors.MUTED,
+    opacity: 0.6
   }
 });

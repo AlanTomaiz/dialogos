@@ -39,7 +39,9 @@ export function MetricCard({
             isComplete ? styles.badgeFilled : styles.badgeEmpty
           ]}
         >
-          {isComplete && <Check size={9} color={Colors.WHITE} strokeWidth={3} />}
+          {isComplete && (
+            <Check size={9} color={Colors.WHITE} strokeWidth={3} />
+          )}
         </View>
       </View>
       <Text style={styles.value}>{status}</Text>

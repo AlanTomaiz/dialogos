@@ -13,11 +13,11 @@ export type EventData = {
   creatorPhotoUrl?: string | null;
   description: string;
   createdAt: string;
-  checked?: boolean;
 };
 
 type EventCardProps = EventData & {
   onPress: () => void;
+  checked?: boolean;
 };
 
 export function EventCard({

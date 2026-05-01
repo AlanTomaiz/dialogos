@@ -1,9 +1,9 @@
 import {
-    collection,
-    doc,
-    firestore,
-    getDocs,
-    updateDoc
+  collection,
+  doc,
+  firestore,
+  getDocs,
+  updateDoc
 } from '../libs/firebase';
 
 const EXPO_PUSH_API = 'https://exp.host/api/v2/push/send';

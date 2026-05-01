@@ -7,7 +7,7 @@ export type CachedUserProfile = {
   photoURL: string | null;
 };
 
-const USER_PROFILE_STORAGE_KEY = 'dial_logged_user_profile';
+const USER_PROFILE_STORAGE_KEY = 'dial_user_profile';
 
 export async function getCachedUserProfile(): Promise<CachedUserProfile | null> {
   if (Platform.OS === 'web') {
