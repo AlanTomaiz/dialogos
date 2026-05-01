@@ -53,8 +53,8 @@ export function subscribeDialEvents(
 
 export async function createDialEvent(
   input: CreateDialEventInput
-): Promise<void> {
-  await addDoc(collection(firestore, 'dial_events'), {
+): Promise<string> {
+  const docRef = await addDoc(collection(firestore, 'dial_events'), {
     title: input.title,
     timeRange: input.timeRange,
     duration: input.duration,
@@ -66,4 +66,6 @@ export async function createDialEvent(
     checked: false,
     createdAt: serverTimestamp()
   });
+
+  return docRef.id;
 }

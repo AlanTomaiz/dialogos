@@ -16,8 +16,8 @@ export function useDialEvents(onLoadError?: () => void) {
   }, [onLoadError]);
 
   const createEvent = useCallback(
-    async (input: CreateDialEventInput): Promise<void> => {
-      await createDialEvent(input);
+    async (input: CreateDialEventInput): Promise<string> => {
+      return createDialEvent(input);
     },
     []
   );

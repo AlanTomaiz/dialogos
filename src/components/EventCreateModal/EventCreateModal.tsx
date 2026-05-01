@@ -2,15 +2,10 @@ import { useEffect, useState } from 'react';
 import { Modal, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '../../theme';
+import type { EventCreateInput } from './EventCreateModal.type';
 import { styles } from './style';
 
-export type EventCreateInput = {
-  title: string;
-  description: string;
-  timeStart: string;
-  timeEnd: string;
-  location: string;
-};
+export type { EventCreateInput } from './EventCreateModal.type';
 
 type EventCreateModalProps = {
   visible: boolean;

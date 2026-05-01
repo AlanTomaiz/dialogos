@@ -31,6 +31,7 @@ export function mapDialEventToEventData(
   data: DialEventDoc
 ): EventData {
   return {
+    id: docId,
     title: data.title?.trim() || 'Evento sem titulo',
     timeRange: data.timeRange?.trim() || 'Horario nao informado',
     duration: data.duration?.trim() || 'Duracao nao informada',

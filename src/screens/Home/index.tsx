@@ -4,11 +4,11 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { EventData } from '../../components/EventCard/EventCard';
 import { EventCard } from '../../components/EventCard/EventCard';
-import {
-  EventCreateInput,
-  EventCreateModal
-} from '../../components/EventCreateModal/EventCreateModal';
+import { EventCreateModal } from '../../components/EventCreateModal/EventCreateModal';
+import { validateEventCreateInput } from '../../components/EventCreateModal/EventCreateModal.action';
+import type { EventCreateInput } from '../../components/EventCreateModal/EventCreateModal.type';
 import { EventDetailModal } from '../../components/EventDetailModal/EventDetailModal';
+import { EventQRCodeModal } from '../../components/EventQRCodeModal/EventQRCodeModal';
 import { QRCodeScannerScreen } from '../../components/QRCodeScannerScreen/QRCodeScannerScreen';
 import { useDialEvents } from '../../hooks/useDialEvents';
 import { useLoggedUserProfile } from '../../hooks/useLoggedUserProfile';
@@ -19,8 +19,6 @@ import { Colors, Spacing } from '../../theme';
 import { formatEventDuration } from '../../utils/formatEventDuration';
 import { styles } from './style';
 
-const TIME_PATTERN = /^([01]\d|2[0-3]):([0-5]\d)$/;
-
 export function Home() {
   const insets = useSafeAreaInsets();
   const toast = useToast();
@@ -29,6 +27,10 @@ export function Home() {
   const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
   const [isScannerVisible, setIsScannerVisible] = useState(false);
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+  const [qrCodeEvent, setQrCodeEvent] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
 
   const {
     uid: loggedUserUid,
@@ -48,22 +50,10 @@ export function Home() {
   }
 
   async function handleCreateEvent(input: EventCreateInput): Promise<void> {
-    if (
-      !input.title ||
-      !input.description ||
-      !input.timeStart ||
-      !input.timeEnd ||
-      !input.location
-    ) {
-      toast.show('Preencha titulo, descricao, horario e local.', 'warning');
-      return;
-    }
+    const validation = validateEventCreateInput(input);
 
-    if (
-      !TIME_PATTERN.test(input.timeStart.trim()) ||
-      !TIME_PATTERN.test(input.timeEnd.trim())
-    ) {
-      toast.show('Informe horario valido no formato HH:MM.', 'warning');
+    if (!validation.valid) {
+      toast.show(validation.message, validation.severity);
       return;
     }
 
@@ -75,7 +65,7 @@ export function Home() {
     }
 
     try {
-      await createEvent({
+      const eventId = await createEvent({
         title: input.title.trim(),
         timeRange: `${input.timeStart} - ${input.timeEnd}`,
         duration: formatEventDuration(input.timeStart, input.timeEnd),
@@ -89,6 +79,7 @@ export function Home() {
       toast.show('Evento criado com sucesso.', 'success');
       broadcastNewEventNotification(input.title.trim()).catch(() => {});
       setIsCreateModalVisible(false);
+      setQrCodeEvent({ id: eventId, title: input.title.trim() });
     } catch (error) {
       console.log('[handleCreateEvent]', error);
       const message =
@@ -147,6 +138,13 @@ export function Home() {
         visible={isCreateModalVisible}
         onClose={() => setIsCreateModalVisible(false)}
         onSubmit={handleCreateEvent}
+      />
+
+      <EventQRCodeModal
+        visible={qrCodeEvent !== null}
+        eventId={qrCodeEvent?.id ?? ''}
+        eventTitle={qrCodeEvent?.title ?? ''}
+        onClose={() => setQrCodeEvent(null)}
       />
 
       <EventDetailModal

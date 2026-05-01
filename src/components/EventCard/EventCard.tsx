@@ -2,6 +2,7 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import { styles } from './style';
 
 export type EventData = {
+  id: string;
   title: string;
   timeRange: string;
   duration: string;
