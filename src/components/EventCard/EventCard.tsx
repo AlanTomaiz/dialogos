@@ -4,6 +4,7 @@ import { styles } from './style';
 export type EventData = {
   id: string;
   title: string;
+  isActive?: boolean;
   timeRange: string;
   duration: string;
   location: string;

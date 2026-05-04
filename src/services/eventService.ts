@@ -10,19 +10,23 @@ import {
   onSnapshot,
   orderBy,
   query,
+  runTransaction,
   serverTimestamp,
-  setDoc,
   updateDoc,
   where,
+  type FirebaseError,
   type Unsubscribe
 } from '../libs/firebase';
 import {
   mapDialEventToEventData,
   type DialEventDoc
 } from '../utils/dialEventMapper';
-import { isWithinEventTimeWindow } from '../utils/parseEventTimeRange';
 import { buildSignedQRPayload, verifyQRPayload } from '../utils/qrCodeSigning';
 import type { UserRole } from './authService';
+import {
+  validateCheckInEligibility,
+  type CheckInErrorCode
+} from './checkInValidation';
 
 export type EventQRCodeRequestInput = {
   eventId: string;
@@ -78,6 +82,7 @@ export async function createDialEvent(
     creatorName: input.creatorName,
     creatorPhotoUrl: input.creatorPhotoUrl,
     description: input.description,
+    isActive: true,
     createdAt: serverTimestamp()
   });
 
@@ -86,51 +91,79 @@ export async function createDialEvent(
 
 export type RegisterParticipantResult =
   | { success: true; alreadyRegistered: boolean }
-  | { success: false; error: string };
+  | { success: false; code: CheckInErrorCode; error: string };
 
 export async function registerParticipant(
   eventId: string,
   uid: string
 ): Promise<RegisterParticipantResult> {
   const eventRef = doc(firestore, 'dial_events', eventId);
-  const eventSnap = await getDoc(eventRef);
 
-  if (!eventSnap.exists()) {
-    return { success: false, error: 'Evento não encontrado.' };
+  try {
+    return await runTransaction(firestore, async (transaction) => {
+      const eventSnap = await transaction.get(eventRef);
+
+      if (!eventSnap.exists()) {
+        return {
+          success: false,
+          code: 'EVENT_NOT_FOUND',
+          error: 'Evento não encontrado.'
+        };
+      }
+
+      const eventData = eventSnap.data() as DialEventDoc;
+
+      const createdAtIso =
+        typeof eventData.createdAt === 'string'
+          ? eventData.createdAt
+          : eventData.createdAt?.toDate().toISOString();
+
+      const eligibility = validateCheckInEligibility({
+        isActive: eventData.isActive !== false,
+        timeRange: eventData.timeRange ?? '',
+        createdAtIso: createdAtIso ?? ''
+      });
+
+      if (!eligibility.allowed) {
+        return {
+          success: false,
+          code: eligibility.code,
+          error: eligibility.message
+        };
+      }
+
+      const participantRef = doc(
+        firestore,
+        'dial_events',
+        eventId,
+        'participants',
+        uid
+      );
+
+      const participantSnap = await transaction.get(participantRef);
+      if (participantSnap.exists()) {
+        return { success: true, alreadyRegistered: true };
+      }
+
+      transaction.set(participantRef, {
+        uid,
+        joinedAt: serverTimestamp(),
+        checked: true
+      });
+
+      return { success: true, alreadyRegistered: false };
+    });
+  } catch (error: unknown) {
+    if (isPermissionDeniedError(error)) {
+      return {
+        success: false,
+        code: 'PERMISSION_DENIED',
+        error: 'Sem permissão para registrar presença neste evento.'
+      };
+    }
+
+    throw error;
   }
-
-  const eventData = eventSnap.data() as DialEventDoc;
-
-  const createdAtIso =
-    typeof eventData.createdAt === 'string'
-      ? eventData.createdAt
-      : (eventData.createdAt?.toDate().toISOString() ??
-        new Date().toISOString());
-
-  if (!isWithinEventTimeWindow(eventData.timeRange ?? '', createdAtIso)) {
-    return { success: false, error: 'Fora do horário permitido do evento.' };
-  }
-
-  const participantRef = doc(
-    firestore,
-    'dial_events',
-    eventId,
-    'participants',
-    uid
-  );
-
-  const participantSnap = await getDoc(participantRef);
-  if (participantSnap.exists()) {
-    return { success: true, alreadyRegistered: true };
-  }
-
-  await setDoc(participantRef, {
-    uid,
-    joinedAt: serverTimestamp(),
-    checked: true
-  });
-
-  return { success: true, alreadyRegistered: false };
 }
 
 export async function getUserCheckedEventIds(uid: string): Promise<string[]> {
@@ -156,38 +189,53 @@ export async function getOrCreateEventQRCodePayload(
     throw new Error('Apenas administradores podem apresentar o QR Code.');
   }
 
-  const eventRef = doc(firestore, 'dial_events', eventId);
-  const eventSnap = await getDoc(eventRef);
+  try {
+    const eventRef = doc(firestore, 'dial_events', eventId);
+    const eventSnap = await getDoc(eventRef);
 
-  if (!eventSnap.exists()) {
-    throw new Error('Evento não encontrado.');
-  }
-
-  const eventData = eventSnap.data() as DialEventDoc;
-  const creatorUid = eventData.creatorUid?.trim();
-
-  if (!creatorUid || creatorUid !== requesterUid) {
-    throw new Error(
-      'Somente o administrador criador do evento pode apresentar o QR Code.'
-    );
-  }
-
-  const existingPayload =
-    typeof eventData.qrPayload === 'string' ? eventData.qrPayload.trim() : '';
-
-  if (existingPayload) {
-    const verification = await verifyQRPayload(existingPayload);
-    if (verification.valid && verification.eventId === eventId) {
-      return existingPayload;
+    if (!eventSnap.exists()) {
+      throw new Error('Evento não encontrado.');
     }
+
+    const eventData = eventSnap.data() as DialEventDoc;
+    const creatorUid = eventData.creatorUid?.trim();
+
+    if (!creatorUid || creatorUid !== requesterUid) {
+      throw new Error(
+        'Somente o administrador criador do evento pode apresentar o QR Code.'
+      );
+    }
+
+    const existingPayload =
+      typeof eventData.qrPayload === 'string' ? eventData.qrPayload.trim() : '';
+
+    if (existingPayload) {
+      const verification = await verifyQRPayload(existingPayload);
+      if (verification.valid && verification.eventId === eventId) {
+        return existingPayload;
+      }
+    }
+
+    const qrPayload = await buildSignedQRPayload(eventId);
+
+    await updateDoc(eventRef, {
+      qrPayload,
+      qrPayloadUpdatedAt: serverTimestamp()
+    });
+
+    return qrPayload;
+  } catch (error: unknown) {
+    if (isPermissionDeniedError(error)) {
+      throw new Error(
+        'Sem permissão para acessar ou atualizar o QR Code deste evento.'
+      );
+    }
+
+    throw error;
   }
+}
 
-  const qrPayload = await buildSignedQRPayload(eventId);
-
-  await updateDoc(eventRef, {
-    qrPayload,
-    qrPayloadUpdatedAt: serverTimestamp()
-  });
-
-  return qrPayload;
+function isPermissionDeniedError(error: unknown): boolean {
+  const firebaseError = error as FirebaseError | null;
+  return firebaseError?.code === 'permission-denied';
 }

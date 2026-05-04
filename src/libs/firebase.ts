@@ -24,6 +24,7 @@ import {
   onSnapshot,
   orderBy,
   query,
+  runTransaction,
   serverTimestamp,
   setDoc,
   updateDoc,
@@ -59,6 +60,7 @@ export {
   onSnapshot,
   orderBy,
   query,
+  runTransaction,
   serverTimestamp,
   setDoc,
   signInWithEmailAndPassword,
@@ -66,4 +68,5 @@ export {
   where
 };
 
-export type { FirebaseError, Unsubscribe };
+  export type { FirebaseError, Unsubscribe };
+

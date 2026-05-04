@@ -42,7 +42,11 @@ export function useDialEvents(onLoadError?: () => void) {
     async (eventId: string): Promise<RegisterParticipantResult> => {
       const uid = auth.currentUser?.uid;
       if (!uid) {
-        return { success: false, error: 'Usuário não autenticado.' };
+        return {
+          success: false,
+          code: 'USER_NOT_AUTHENTICATED',
+          error: 'Usuário não autenticado.'
+        };
       }
 
       const result = await registerParticipant(eventId, uid);

@@ -27,6 +27,29 @@ export const styles = StyleSheet.create({
     color: Colors.MUTED,
     textAlign: 'center'
   },
+  scanResultCard: {
+    borderRadius: Radius.md,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.base,
+    marginBottom: Spacing.sm
+  },
+  scanResultSuccess: {
+    backgroundColor: Colors.SUCCESS_BG
+  },
+  scanResultError: {
+    backgroundColor: Colors.WHITE_ALPHA_90
+  },
+  scanResultText: {
+    fontFamily: Typography.family.semiBold,
+    fontSize: Typography.size.sm,
+    textAlign: 'center'
+  },
+  scanResultTextSuccess: {
+    color: Colors.SUCCESS_TEXT
+  },
+  scanResultTextError: {
+    color: Colors.TOAST_ERROR
+  },
   scannerArea: {
     flex: 1,
     backgroundColor: Colors.WHITE,

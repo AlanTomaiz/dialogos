@@ -3,6 +3,7 @@ import type { EventData } from '../components/EventCard/EventCard';
 
 export type DialEventDoc = {
   title?: string;
+  isActive?: boolean;
   timeRange?: string;
   duration?: string;
   location?: string;
@@ -34,6 +35,7 @@ export function mapDialEventToEventData(
   return {
     id: docId,
     title: data.title?.trim() || 'Evento sem titulo',
+    isActive: data.isActive !== false,
     timeRange: data.timeRange?.trim() || 'Horario nao informado',
     duration: data.duration?.trim() || 'Duracao nao informada',
     location: data.location?.trim() || 'Local nao informado',

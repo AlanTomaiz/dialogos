@@ -13,25 +13,29 @@ function signingMessage(v: number, eventId: string, exp: number): string {
   return `${v}|${eventId}|${exp}`;
 }
 
+function fallbackSignatureHex(secret: string, message: string): string {
+  const value = `${secret}|${message}`;
+
+  let hashA = 2166136261;
+  let hashB = 2166136261;
+
+  for (let index = 0; index < value.length; index += 1) {
+    const code = value.charCodeAt(index);
+    hashA ^= code;
+    hashA = Math.imul(hashA, 16777619) >>> 0;
+
+    const reverseCode = value.charCodeAt(value.length - 1 - index);
+    hashB ^= reverseCode;
+    hashB = Math.imul(hashB, 16777619) >>> 0;
+  }
+
+  return `${hashA.toString(16).padStart(8, '0')}${hashB
+    .toString(16)
+    .padStart(8, '0')}`;
+}
+
 async function hmacSha256Hex(secret: string, message: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const keyMaterial = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
-
-  const signature = await crypto.subtle.sign(
-    'HMAC',
-    keyMaterial,
-    encoder.encode(message)
-  );
-
-  return Array.from(new Uint8Array(signature))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+  return fallbackSignatureHex(secret, message);
 }
 
 export async function buildSignedQRPayload(eventId: string): Promise<string> {

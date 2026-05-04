@@ -9,7 +9,10 @@ import { validateEventCreateInput } from '../../components/EventCreateModal/Even
 import type { EventCreateInput } from '../../components/EventCreateModal/EventCreateModal.type';
 import { EventDetailModal } from '../../components/EventDetailModal/EventDetailModal';
 import { EventQRCodeModal } from '../../components/EventQRCodeModal/EventQRCodeModal';
-import { QRCodeScannerScreen } from '../../components/QRCodeScannerScreen/QRCodeScannerScreen';
+import {
+  QRCodeScannerScreen,
+  type QRCodeScanResult
+} from '../../components/QRCodeScannerScreen/QRCodeScannerScreen';
 import { MODAL_NAMESPACE } from '../../config/modals';
 import { useDialEvents } from '../../hooks/useDialEvents';
 import { useEventAvailability } from '../../hooks/useEventAvailability';
@@ -19,7 +22,6 @@ import { useToast } from '../../hooks/useToast';
 import { broadcastNewEventNotification } from '../../services/notificationService';
 import { Colors, Spacing } from '../../theme';
 import { formatEventDuration } from '../../utils/formatEventDuration';
-import { isWithinEventTimeWindow } from '../../utils/parseEventTimeRange';
 import { verifyQRPayload } from '../../utils/qrCodeSigning';
 import { styles } from './style';
 
@@ -35,6 +37,8 @@ export function Home() {
     id: string;
     title: string;
   } | null>(null);
+
+  const [scannerEventId, setScannerEventId] = useState<string | null>(null);
 
   const {
     uid: loggedUserUid,
@@ -68,16 +72,7 @@ export function Home() {
   function handleConfirmPresence(): void {
     if (!selectedEvent) return;
 
-    const isValidEvent = isWithinEventTimeWindow(
-      selectedEvent.timeRange,
-      selectedEvent.createdAt
-    );
-
-    if (!isValidEvent) {
-      toast.show('Evento fora do horário permitido.', 'error');
-      return;
-    }
-
+    setScannerEventId(selectedEvent.id);
     setSelectedEvent(null);
     closeModal(MODAL_NAMESPACE.EVENT_DETAIL);
     openModal(MODAL_NAMESPACE.EVENT_SCANNER);
@@ -103,41 +98,55 @@ export function Home() {
     openModal(MODAL_NAMESPACE.EVENT_QR_CODE);
   }
 
-  async function handleScanned(rawValue: string): Promise<void> {
-    // closeModal(MODAL_NAMESPACE.EVENT_SCANNER);
+  async function handleScanned(rawValue: string): Promise<QRCodeScanResult> {
+    try {
+      if (!scannerEventId) {
+        const message = 'Evento para check-in nao encontrado.';
+        toast.show(message, 'error');
+        return { success: false, message };
+      }
 
-    if (!selectedEvent) return;
+      const verification = await verifyQRPayload(rawValue);
 
-    const verification = await verifyQRPayload(rawValue);
+      if (!verification.valid) {
+        toast.show(verification.error, 'error');
+        return { success: false, message: verification.error };
+      }
 
-    if (!verification.valid) {
-      toast.show(verification.error, 'error');
+      if (verification.eventId !== scannerEventId) {
+        const message = 'QR Code pertence a outro evento.';
+        toast.show(message, 'error');
+        return { success: false, message };
+      }
 
-      setSelectedEvent(null);
-      closeModal(MODAL_NAMESPACE.EVENT_SCANNER);
-      return;
-    }
+      const result = await registerEventParticipant(scannerEventId);
 
-    if (verification.eventId !== selectedEvent.id) {
-      toast.show('QR Code pertence a outro evento.', 'error');
+      if (!result.success) {
+        toast.show(result.error, 'error');
+        return { success: false, message: result.error };
+      }
 
-      setSelectedEvent(null);
-      closeModal(MODAL_NAMESPACE.EVENT_SCANNER);
-      return;
-    }
+      const message = result.alreadyRegistered
+        ? 'Presença já registrada.'
+        : 'Presença confirmada!';
 
-    const result = await registerEventParticipant(selectedEvent.id);
-    setSelectedEvent(null);
+      if (result.alreadyRegistered) {
+        toast.show(message, 'success');
+      } else {
+        toast.show(message, 'success');
+      }
 
-    if (!result.success) {
-      toast.show(result.error, 'error');
-      return;
-    }
+      setScannerEventId(null);
 
-    if (result.alreadyRegistered) {
-      toast.show('Presença já registrada.', 'success');
-    } else {
-      toast.show('Presença confirmada!', 'success');
+      return { success: true, message };
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : 'Falha ao processar o QR Code para check-in.';
+
+      toast.show(message, 'error');
+      return { success: false, message };
     }
   }
 
@@ -221,7 +230,7 @@ export function Home() {
         <View style={styles.agendaList}>
           {events.map((event) => (
             <EventCard
-              key={`${event.title}-${event.createdAt}`}
+              key={event.id}
               {...event}
               checked={checkedEventIds.has(event.id)}
               onPress={() => {
@@ -281,7 +290,10 @@ export function Home() {
 
       <QRCodeScannerScreen
         visible={isOpen(MODAL_NAMESPACE.EVENT_SCANNER)}
-        onClose={() => closeModal(MODAL_NAMESPACE.EVENT_SCANNER)}
+        onClose={() => {
+          setScannerEventId(null);
+          closeModal(MODAL_NAMESPACE.EVENT_SCANNER);
+        }}
         onScanned={handleScanned}
       />
 

@@ -19,27 +19,34 @@ function parseEventTimeRange(
   const [startH, startM] = startTime.split(':').map(Number);
   const [endH, endM] = endTime.split(':').map(Number);
 
+  if (endH * 60 + endM <= startH * 60 + startM) {
+    return null;
+  }
+
   const year = baseDate.getFullYear();
   const month = baseDate.getMonth();
   const day = baseDate.getDate();
 
   const startMs = new Date(year, month, day, startH, startM, 0, 0).getTime();
-  const endDate = new Date(year, month, day, endH, endM, 0, 0);
+  const endMs = new Date(year, month, day, endH, endM, 0, 0).getTime();
 
-  if (endH * 60 + endM <= startH * 60 + startM) {
-    endDate.setDate(endDate.getDate() + 1);
-  }
-
-  return { startMs, endMs: endDate.getTime() };
+  return { startMs, endMs };
 }
 
 export function isWithinEventTimeWindow(
   timeRange: string,
   baseDateIso: string
 ): boolean {
-  const window = parseEventTimeRange(timeRange, baseDateIso);
-  if (!window) return true;
+  return isWithinEventTimeWindowAt(timeRange, baseDateIso, Date.now());
+}
 
-  const now = Date.now();
-  return now >= window.startMs && now <= window.endMs;
+export function isWithinEventTimeWindowAt(
+  timeRange: string,
+  baseDateIso: string,
+  nowMs: number
+): boolean {
+  const window = parseEventTimeRange(timeRange, baseDateIso);
+  if (!window) return false;
+
+  return nowMs >= window.startMs && nowMs <= window.endMs;
 }

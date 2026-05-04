@@ -34,5 +34,22 @@ export function validateEventCreateInput(
     };
   }
 
+  const [startHour, startMinute] = input.timeStart
+    .trim()
+    .split(':')
+    .map(Number);
+
+  const [endHour, endMinute] = input.timeEnd.trim().split(':').map(Number);
+  const startInMinutes = startHour * 60 + startMinute;
+  const endInMinutes = endHour * 60 + endMinute;
+
+  if (endInMinutes <= startInMinutes) {
+    return {
+      valid: false,
+      message: 'Horario final deve ser maior que o inicial no mesmo dia.',
+      severity: 'warning'
+    };
+  }
+
   return { valid: true };
 }
