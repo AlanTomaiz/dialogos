@@ -4,6 +4,7 @@ expo-env.d.ts
 .env
 .env.local
 dist
+tmp
 
 # Native
 .kotlin/
