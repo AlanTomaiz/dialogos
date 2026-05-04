@@ -68,7 +68,16 @@ export const styles = StyleSheet.create({
     fontFamily: Typography.family.bold,
     fontSize: Typography.size.lg,
     color: Colors.TITLE,
+    flex: 1
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: Spacing.sm
+  },
+  participantsButton: {
+    padding: Spacing.xs,
+    marginLeft: Spacing.sm
   },
   description: {
     fontFamily: Typography.family.regular,

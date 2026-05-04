@@ -8,6 +8,7 @@ import { EventCreateModal } from '../../components/EventCreateModal/EventCreateM
 import { validateEventCreateInput } from '../../components/EventCreateModal/EventCreateModal.action';
 import type { EventCreateInput } from '../../components/EventCreateModal/EventCreateModal.type';
 import { EventDetailModal } from '../../components/EventDetailModal/EventDetailModal';
+import { EventParticipantsModal } from '../../components/EventParticipantsModal/EventParticipantsModal';
 import { EventQRCodeModal } from '../../components/EventQRCodeModal/EventQRCodeModal';
 import {
   QRCodeScannerScreen,
@@ -40,6 +41,11 @@ export function Home() {
 
   const [scannerEventId, setScannerEventId] = useState<string | null>(null);
 
+  const [participantsEvent, setParticipantsEvent] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
+
   const {
     uid: loggedUserUid,
     fullName: loggedUserName,
@@ -53,8 +59,13 @@ export function Home() {
     toast.show('Falha ao carregar eventos do Firebase.', 'error');
   }, [toast]);
 
-  const { events, checkedEventIds, createEvent, registerEventParticipant } =
-    useDialEvents(handleEventsLoadError);
+  const {
+    events,
+    checkedEventIds,
+    createEvent,
+    registerEventParticipant,
+    getParticipants
+  } = useDialEvents(handleEventsLoadError);
 
   const isSelectedEventChecked =
     selectedEvent !== null && checkedEventIds.has(selectedEvent.id);
@@ -76,6 +87,15 @@ export function Home() {
     setSelectedEvent(null);
     closeModal(MODAL_NAMESPACE.EVENT_DETAIL);
     openModal(MODAL_NAMESPACE.EVENT_SCANNER);
+  }
+
+  function handleViewParticipants(): void {
+    if (!selectedEvent) return;
+
+    setParticipantsEvent({ id: selectedEvent.id, title: selectedEvent.title });
+    setSelectedEvent(null);
+    closeModal(MODAL_NAMESPACE.EVENT_DETAIL);
+    openModal(MODAL_NAMESPACE.EVENT_PARTICIPANTS);
   }
 
   function handlePresentEventQRCode(): void {
@@ -286,6 +306,7 @@ export function Home() {
           canPresentSelectedEventQRCode ||
           (!isSelectedEventChecked && isSelectedEventAvailable)
         }
+        onViewParticipants={handleViewParticipants}
       />
 
       <QRCodeScannerScreen
@@ -295,6 +316,16 @@ export function Home() {
           closeModal(MODAL_NAMESPACE.EVENT_SCANNER);
         }}
         onScanned={handleScanned}
+      />
+
+      <EventParticipantsModal
+        visible={isOpen(MODAL_NAMESPACE.EVENT_PARTICIPANTS)}
+        onClose={() => {
+          setParticipantsEvent(null);
+          closeModal(MODAL_NAMESPACE.EVENT_PARTICIPANTS);
+        }}
+        eventTitle={participantsEvent?.title ?? ''}
+        fetchParticipants={() => getParticipants(participantsEvent?.id ?? '')}
       />
 
       {isAdmin && (

@@ -140,13 +140,23 @@ export async function registerParticipant(
         uid
       );
 
-      const participantSnap = await transaction.get(participantRef);
+      const userRef = doc(firestore, 'dial_users', uid);
+      const [participantSnap, userSnap] = await Promise.all([
+        transaction.get(participantRef),
+        transaction.get(userRef)
+      ]);
+
       if (participantSnap.exists()) {
         return { success: true, alreadyRegistered: true };
       }
 
+      const fullName = userSnap.exists()
+        ? ((userSnap.data() as { fullName?: string }).fullName ?? null)
+        : null;
+
       transaction.set(participantRef, {
         uid,
+        fullName,
         joinedAt: serverTimestamp(),
         checked: true
       });
@@ -164,6 +174,53 @@ export async function registerParticipant(
 
     throw error;
   }
+}
+
+export type ParticipantData = {
+  uid: string;
+  fullName: string | null;
+  joinedAt: Date | null;
+};
+
+export async function getEventParticipants(
+  eventId: string
+): Promise<ParticipantData[]> {
+  const snap = await getDocs(
+    collection(firestore, 'dial_events', eventId, 'participants')
+  );
+
+  const participants = snap.docs.map((d) => {
+    const data = d.data();
+    return {
+      uid: data.uid as string,
+      fullName: (data.fullName as string | null) ?? null,
+      joinedAt: data.joinedAt?.toDate?.() ?? null
+    };
+  });
+
+  const missing = participants.filter((p) => !p.fullName);
+
+  if (missing.length > 0) {
+    const userSnaps = await Promise.allSettled(
+      missing.map((p) => getDoc(doc(firestore, 'dial_users', p.uid)))
+    );
+
+    const nameByUid = new Map<string, string>();
+    userSnaps.forEach((result, index) => {
+      if (result.status === 'fulfilled' && result.value.exists()) {
+        const name = (result.value.data() as { fullName?: string }).fullName;
+        if (name) {
+          nameByUid.set(missing[index].uid, name);
+        }
+      }
+    });
+
+    return participants.map((p) =>
+      p.fullName ? p : { ...p, fullName: nameByUid.get(p.uid) ?? null }
+    );
+  }
+
+  return participants;
 }
 
 export async function getUserCheckedEventIds(uid: string): Promise<string[]> {

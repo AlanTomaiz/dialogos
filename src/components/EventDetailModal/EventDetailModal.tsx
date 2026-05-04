@@ -1,4 +1,4 @@
-import { Clock, MapPin } from 'lucide-react-native';
+import { Clock, MapPin, Users } from 'lucide-react-native';
 import { Image, Modal, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '../../theme';
@@ -14,6 +14,7 @@ type EventDetailModalProps = {
   onPrimaryAction: () => void;
   primaryActionLabel: string;
   showPrimaryAction: boolean;
+  onViewParticipants?: () => void;
 };
 
 export function EventDetailModal({
@@ -22,7 +23,8 @@ export function EventDetailModal({
   onClose,
   onPrimaryAction,
   primaryActionLabel,
-  showPrimaryAction
+  showPrimaryAction,
+  onViewParticipants
 }: EventDetailModalProps) {
   const insets = useSafeAreaInsets();
 
@@ -68,7 +70,18 @@ export function EventDetailModal({
             </View>
           </View>
 
-          <Text style={styles.title}>{event.title}</Text>
+          <View style={styles.titleRow}>
+            <Text style={styles.title}>{event.title}</Text>
+            {onViewParticipants && (
+              <TouchableOpacity
+                style={styles.participantsButton}
+                onPress={onViewParticipants}
+                activeOpacity={0.7}
+              >
+                <Users size={20} color={Colors.MUTED} strokeWidth={1.8} />
+              </TouchableOpacity>
+            )}
+          </View>
           <Text style={styles.description}>{event.description}</Text>
 
           <View style={styles.detailRow}>

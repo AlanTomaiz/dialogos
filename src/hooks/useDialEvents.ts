@@ -3,10 +3,12 @@ import type { EventData } from '../components/EventCard/EventCard';
 import { auth } from '../libs/firebase';
 import {
   createDialEvent,
+  getEventParticipants,
   getUserCheckedEventIds,
   registerParticipant,
   subscribeDialEvents,
   type CreateDialEventInput,
+  type ParticipantData,
   type RegisterParticipantResult
 } from '../services/eventService';
 
@@ -59,10 +61,18 @@ export function useDialEvents(onLoadError?: () => void) {
     []
   );
 
+  const getParticipants = useCallback(
+    (eventId: string): Promise<ParticipantData[]> => {
+      return getEventParticipants(eventId);
+    },
+    []
+  );
+
   return {
     events,
     checkedEventIds,
     createEvent,
-    registerEventParticipant
+    registerEventParticipant,
+    getParticipants
   };
 }
