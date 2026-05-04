@@ -21,7 +21,8 @@
       },
       "runtimeVersion": {
         "policy": "appVersion"
-      }
+      },
+      "buildNumber": "2"
     },
     "android": {
       "package": "com.unicesumar.dialogos",
