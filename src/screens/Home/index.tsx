@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react-native';
+import { Plus, UserCircle } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,7 +26,11 @@ import { formatEventDuration } from '../../utils/formatEventDuration';
 import { verifyQRPayload } from '../../utils/qrCodeSigning';
 import { styles } from './style';
 
-export function Home() {
+type HomeProps = {
+  onNavigateToProfile: () => void;
+};
+
+export function Home({ onNavigateToProfile }: HomeProps) {
   const insets = useSafeAreaInsets();
   const toast = useToast();
   const bottomOffset = insets.bottom;
@@ -219,6 +223,14 @@ export function Home() {
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <Text style={styles.headerTitle}>Encontros</Text>
+        <TouchableOpacity
+          style={styles.headerAction}
+          onPress={onNavigateToProfile}
+          accessibilityLabel="Acessar perfil"
+          accessibilityRole="button"
+        >
+          <UserCircle size={28} color={Colors.TITLE} strokeWidth={1.5} />
+        </TouchableOpacity>
       </View>
 
       {/* <View style={styles.metricRowWrapper}>

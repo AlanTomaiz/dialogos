@@ -19,6 +19,9 @@ export const styles = StyleSheet.create({
     fontSize: Typography.size.xl,
     color: Colors.TITLE
   },
+  headerAction: {
+    padding: Spacing.xs
+  },
   metricRowWrapper: {
     flexDirection: 'row'
   },

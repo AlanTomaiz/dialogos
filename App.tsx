@@ -9,10 +9,11 @@ import { ToastProvider, useToast } from './src/hooks/useToast';
 import { auth } from './src/libs/firebase';
 import { Home } from './src/screens/Home';
 import { Login } from './src/screens/Login';
+import { Profile } from './src/screens/Profile';
 import { SignUp } from './src/screens/SignUp';
 import { getUserStatusByUid } from './src/services/authService';
 
-type AppScreen = 'login' | 'signup' | 'home';
+type AppScreen = 'login' | 'signup' | 'home' | 'profile';
 
 function GlobalToastLayer() {
   const toast = useToast();
@@ -54,7 +55,9 @@ export default function App() {
       <ToastProvider>
         <SplashGate ready={fontsLoaded && isAuthResolved}>
           {currentScreen === 'home' ? (
-            <Home />
+            <Home onNavigateToProfile={() => setCurrentScreen('profile')} />
+          ) : currentScreen === 'profile' ? (
+            <Profile onBack={() => setCurrentScreen('home')} />
           ) : currentScreen === 'login' ? (
             <Login
               onNavigateToSignUp={() => setCurrentScreen('signup')}
