@@ -1,0 +1,87 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Diálogos Conexão - favicon</title>
+  <desc id="desc">Ícone inspirado na arte original com balões de fala, megafone e trajetória pontilhada em fundo mostarda.</desc>
+
+  <defs>
+    <linearGradient id="bgGlow" x1="72" y1="48" x2="440" y2="464" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F2BD57"/>
+      <stop offset="1" stop-color="#E4A533"/>
+    </linearGradient>
+
+    <linearGradient id="stone" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#D6D6D6"/>
+      <stop offset="1" stop-color="#9A9A9A"/>
+    </linearGradient>
+
+    <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#7A5B17" flood-opacity="0.22"/>
+    </filter>
+
+    <filter id="iconShadow" x="-60%" y="-60%" width="220%" height="220%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#000000" flood-opacity="0.20"/>
+    </filter>
+  </defs>
+
+  <rect x="20" y="20" width="472" height="472" rx="108" fill="url(#bgGlow)"/>
+
+
+  <!-- Large background D -->
+  <g opacity="0.42" transform="rotate(-5 256 256)">
+    <path d="M120 100C120 84 132 72 148 72H226C353 72 438 154 438 255C438 357 353 440 226 440H148C132 440 120 428 120 412V100Z"
+          fill="#D9941D" fill-opacity="0.18"/>
+    <path d="M120 100C120 84 132 72 148 72H226C353 72 438 154 438 255C438 357 353 440 226 440H148C132 440 120 428 120 412V100Z"
+          stroke="#40454C" stroke-width="15" stroke-linejoin="round" stroke-opacity="0.42"/>
+    <path d="M134 88C134 76 143 67 156 67H230C360 67 448 153 448 258C448 363 360 449 230 449H156"
+          stroke="#40454C" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.28"/>
+    <path d="M223 132C310 132 368 180 368 255C368 330 310 379 223 379"
+          stroke="#40454C" stroke-width="10" stroke-linecap="round" stroke-opacity="0.32"/>
+    <path d="M214 144C296 143 351 188 351 256C351 324 297 368 214 368"
+          stroke="#40454C" stroke-width="4.5" stroke-linecap="round" stroke-opacity="0.24"/>
+  </g>
+
+  <path d="M115 120C170 55 283 45 355 109C430 176 432 298 353 366C287 424 179 425 117 360C58 299 58 193 115 120Z"
+        stroke="#7E95B0" stroke-width="4" stroke-linecap="round" stroke-dasharray="7 12" opacity="0.8"/>
+
+  <ellipse cx="256" cy="410" rx="88" ry="18" fill="#B87F1E" opacity="0.22" filter="url(#softShadow)"/>
+
+  <!-- Left speech bubble -->
+  <g filter="url(#iconShadow)">
+    <circle cx="142" cy="168" r="56" fill="url(#stone)" opacity="0.96"/>
+    <path d="M111 174C96 174 84 163 84 149C84 134 97 123 114 123H150C167 123 180 134 180 149C180 163 167 174 150 174H132L117 188L121 174H111Z"
+          fill="#BDBDBD" stroke="#51565C" stroke-width="3.5" stroke-linejoin="round"/>
+    <path d="M99 143C107 148 114 151 121 151C132 151 138 144 143 136" stroke="#51565C" stroke-width="3" stroke-linecap="round"/>
+    <path d="M125 157C131 161 138 164 145 164C153 164 159 161 164 155" stroke="#51565C" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="101" cy="138" r="2.5" fill="#51565C"/>
+  </g>
+
+  <!-- Middle chat bubble -->
+  <g filter="url(#iconShadow)">
+    <circle cx="255" cy="184" r="40" fill="url(#stone)" opacity="0.96"/>
+    <path d="M231 191C220 191 211 183 211 173C211 162 220 154 231 154H278C290 154 299 162 299 173C299 183 290 191 278 191H261L246 204L249 191H231Z"
+          fill="#BDBDBD" stroke="#51565C" stroke-width="3.5" stroke-linejoin="round"/>
+    <path d="M227 166H282" stroke="#51565C" stroke-width="3" stroke-linecap="round"/>
+    <path d="M227 174H282" stroke="#51565C" stroke-width="3" stroke-linecap="round"/>
+    <path d="M227 182H266" stroke="#51565C" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!-- Right megaphone badge -->
+  <g filter="url(#iconShadow)">
+    <circle cx="364" cy="170" r="66" fill="url(#stone)" opacity="0.96"/>
+    <g transform="translate(364 170) rotate(-28) translate(-364 -170)">
+      <path d="M340 162L377 150C391 146 403 157 399 171L391 199L352 188L340 162Z"
+            fill="#C7C7C7" stroke="#50555C" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M331 156L341 161L353 189L345 196C338 202 328 199 325 191L318 173C315 165 322 157 331 156Z"
+            fill="#B2B2B2" stroke="#50555C" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M354 188L365 214" stroke="#50555C" stroke-width="4" stroke-linecap="round"/>
+      <path d="M390 145L405 132" stroke="#2F3338" stroke-width="4" stroke-linecap="round"/>
+      <path d="M400 161L420 156" stroke="#2F3338" stroke-width="4" stroke-linecap="round"/>
+      <path d="M398 177L415 185" stroke="#2F3338" stroke-width="4" stroke-linecap="round"/>
+    </g>
+  </g>
+
+
+
+  <!-- Accent arcs to echo the original composition -->
+  <path d="M404 103C423 113 438 128 448 147" stroke="#7E95B0" stroke-width="4" stroke-linecap="round" stroke-dasharray="7 12" opacity="0.7"/>
+  <path d="M96 256C94 227 98 200 108 176" stroke="#7E95B0" stroke-width="4" stroke-linecap="round" stroke-dasharray="7 12" opacity="0.7"/>
+</svg>
