@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { auth } from '../libs/firebase';
-import { getCurrentDialUserProfile } from '../services/authService';
+import { getCurrentUserProfile, type UserRole } from '../services/authService';
 import {
   cacheUserProfile,
   getCachedUserProfile
@@ -10,12 +10,14 @@ type LoggedUserProfile = {
   uid: string;
   fullName: string;
   photoURL: string | null;
+  role: UserRole;
 };
 
 const FALLBACK_PROFILE: LoggedUserProfile = {
   uid: '',
   fullName: 'Usuario',
-  photoURL: null
+  photoURL: null,
+  role: 'MEMBER'
 };
 
 export function useLoggedUserProfile() {
@@ -32,13 +34,14 @@ export function useLoggedUserProfile() {
         if (
           isMounted &&
           cachedProfile &&
+          cachedProfile.role &&
           (!authUid || cachedProfile.uid === authUid)
         ) {
           setProfile(cachedProfile);
           return;
         }
 
-        const currentProfile = await getCurrentDialUserProfile();
+        const currentProfile = await getCurrentUserProfile();
 
         if (!isMounted || !currentProfile) {
           return;
@@ -47,7 +50,8 @@ export function useLoggedUserProfile() {
         const nextProfile: LoggedUserProfile = {
           uid: currentProfile.uid,
           fullName: currentProfile.fullName,
-          photoURL: currentProfile.photoURL
+          photoURL: currentProfile.photoURL,
+          role: currentProfile.role
         };
 
         setProfile(nextProfile);

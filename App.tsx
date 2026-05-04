@@ -52,7 +52,6 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <ToastProvider>
-        <GlobalToastLayer />
         <SplashGate ready={fontsLoaded && isAuthResolved}>
           {currentScreen === 'home' ? (
             <Home />
@@ -67,6 +66,7 @@ export default function App() {
               onSignUpSuccess={() => setCurrentScreen('home')}
             />
           )}
+          <GlobalToastLayer />
         </SplashGate>
       </ToastProvider>
     </SafeAreaProvider>

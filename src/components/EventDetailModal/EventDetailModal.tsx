@@ -1,7 +1,6 @@
 import { Clock, MapPin } from 'lucide-react-native';
 import { Image, Modal, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useDialEvents } from '../../hooks/useDialEvents';
 import { Colors } from '../../theme';
 import { formatRelativeDate } from '../../utils/formatRelativeDate';
 import { getInitialsFromName } from '../../utils/getInitialsFromName';
@@ -12,14 +11,18 @@ type EventDetailModalProps = {
   event: EventData | null;
   visible: boolean;
   onClose: () => void;
-  onConfirmPresence: () => void;
+  onPrimaryAction: () => void;
+  primaryActionLabel: string;
+  showPrimaryAction: boolean;
 };
 
 export function EventDetailModal({
   event,
   visible,
   onClose,
-  onConfirmPresence
+  onPrimaryAction,
+  primaryActionLabel,
+  showPrimaryAction
 }: EventDetailModalProps) {
   const insets = useSafeAreaInsets();
 
@@ -29,9 +32,6 @@ export function EventDetailModal({
     event.creatorInitials || getInitialsFromName(event.creatorName);
   const hasCreatorPhoto = Boolean(event.creatorPhotoUrl);
   const createdAtLabel = formatRelativeDate(event.createdAt);
-
-  const { checkedEventIds } = useDialEvents();
-  const isChecked = checkedEventIds.has(event.id);
 
   return (
     <Modal
@@ -82,12 +82,12 @@ export function EventDetailModal({
             <Text style={styles.detailText}>{event.location}</Text>
           </View>
 
-          {!isChecked && (
+          {showPrimaryAction && (
             <TouchableOpacity
               style={styles.attendButton}
-              onPress={onConfirmPresence}
+              onPress={onPrimaryAction}
             >
-              <Text style={styles.attendButtonText}>Registrar presença</Text>
+              <Text style={styles.attendButtonText}>{primaryActionLabel}</Text>
             </TouchableOpacity>
           )}
         </View>

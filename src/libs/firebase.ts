@@ -1,34 +1,34 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-	getApp,
-	getApps,
-	initializeApp,
-	type FirebaseError
+  getApp,
+  getApps,
+  initializeApp,
+  type FirebaseError
 } from 'firebase/app';
 import {
-	createUserWithEmailAndPassword,
-	getAuth,
-	getReactNativePersistence,
-	initializeAuth,
-	signInWithEmailAndPassword,
-	type Auth
+  createUserWithEmailAndPassword,
+  getAuth,
+  getReactNativePersistence,
+  initializeAuth,
+  signInWithEmailAndPassword,
+  type Auth
 } from 'firebase/auth';
 import {
-	addDoc,
-	collection,
-	collectionGroup,
-	doc,
-	getDoc,
-	getDocs,
-	getFirestore,
-	onSnapshot,
-	orderBy,
-	query,
-	serverTimestamp,
-	setDoc,
-	updateDoc,
-	where,
-	type Unsubscribe
+  addDoc,
+  collection,
+  collectionGroup,
+  doc,
+  getDoc,
+  getDocs,
+  getFirestore,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
+  type Unsubscribe
 } from 'firebase/firestore';
 import { Platform } from 'react-native';
 import { FIREBASE_CONFIG } from '../config/firebase';
@@ -49,22 +49,21 @@ export const auth = createAuthInstance();
 export const firestore = getFirestore(app);
 
 export {
-	addDoc,
-	collection,
-	collectionGroup,
-	createUserWithEmailAndPassword,
-	doc,
-	getDoc,
-	getDocs,
-	onSnapshot,
-	orderBy,
-	query,
-	serverTimestamp,
-	setDoc,
-	signInWithEmailAndPassword,
-	updateDoc,
-	where
+  addDoc,
+  collection,
+  collectionGroup,
+  createUserWithEmailAndPassword,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc,
+  signInWithEmailAndPassword,
+  updateDoc,
+  where
 };
 
-	export type { FirebaseError, Unsubscribe };
-
+export type { FirebaseError, Unsubscribe };

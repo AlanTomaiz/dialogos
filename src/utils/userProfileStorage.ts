@@ -1,10 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
+import type { UserRole } from '../services/authService';
 
 export type CachedUserProfile = {
   uid: string;
   fullName: string;
   photoURL: string | null;
+  role: UserRole;
 };
 
 const USER_PROFILE_STORAGE_KEY = 'dial_user_profile';

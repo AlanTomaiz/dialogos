@@ -10,6 +10,8 @@ export type DialEventDoc = {
   creatorName?: string;
   creatorPhotoUrl?: string | null;
   description?: string;
+  qrPayload?: string;
+  qrPayloadUpdatedAt?: Timestamp | string | null;
   createdAt?: Timestamp | string | null;
 };
 

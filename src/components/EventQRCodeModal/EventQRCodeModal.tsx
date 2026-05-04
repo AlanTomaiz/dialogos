@@ -12,6 +12,9 @@ export function EventQRCodeModal({
   visible,
   eventId,
   eventTitle,
+  requesterUid,
+  requesterRole,
+  onLoadError,
   onClose
 }: EventQRCodeModalProps) {
   const insets = useSafeAreaInsets();
@@ -24,14 +27,29 @@ export function EventQRCodeModal({
     }
 
     let cancelled = false;
-    buildQRCodeValue(eventId).then((value) => {
-      if (!cancelled) setQrValue(value);
-    });
+    buildQRCodeValue({ eventId, requesterUid, requesterRole })
+      .then((value) => {
+        if (!cancelled) {
+          setQrValue(value);
+        }
+      })
+      .catch((error: unknown) => {
+        if (cancelled) {
+          return;
+        }
+
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Falha ao carregar QR Code do evento.';
+
+        onLoadError(message);
+      });
 
     return () => {
       cancelled = true;
     };
-  }, [visible, eventId]);
+  }, [visible, eventId, requesterUid, requesterRole, onLoadError]);
 
   async function handleShare(): Promise<void> {
     await shareEventQRCode(eventTitle, eventId);

@@ -1,8 +1,13 @@
 import { Share } from 'react-native';
-import { buildSignedQRPayload } from '../../utils/qrCodeSigning';
+import {
+  getOrCreateEventQRCodePayload,
+  type EventQRCodeRequestInput
+} from '../../services/eventService';
 
-export async function buildQRCodeValue(eventId: string): Promise<string> {
-  return buildSignedQRPayload(eventId);
+export async function buildQRCodeValue(
+  input: EventQRCodeRequestInput
+): Promise<string> {
+  return getOrCreateEventQRCodePayload(input);
 }
 
 export async function shareEventQRCode(

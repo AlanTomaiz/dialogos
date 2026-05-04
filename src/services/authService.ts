@@ -12,10 +12,11 @@ import {
 
 export type UserRole = 'ADMIN' | 'MEMBER';
 export type UserStatus = 'ACTIVE' | 'INACTIVE';
-export type DialUserProfile = {
+export type UserProfile = {
   uid: string;
   fullName: string;
   photoURL: string | null;
+  role: UserRole;
 };
 
 const DEFAULT_USER_ROLE: UserRole = 'MEMBER';
@@ -103,7 +104,7 @@ export async function getUserStatusByUid(
   return data.status ?? DEFAULT_USER_STATUS;
 }
 
-export async function getCurrentDialUserProfile(): Promise<DialUserProfile | null> {
+export async function getCurrentUserProfile(): Promise<UserProfile | null> {
   const currentUser = auth.currentUser;
 
   if (!currentUser) {
@@ -122,19 +123,22 @@ export async function getCurrentDialUserProfile(): Promise<DialUserProfile | nul
     return {
       uid: currentUser.uid,
       fullName: fallbackName,
-      photoURL: currentUser.photoURL ?? null
+      photoURL: currentUser.photoURL ?? null,
+      role: DEFAULT_USER_ROLE
     };
   }
 
   const data = userSnap.data() as {
     fullName?: string;
     photoURL?: string | null;
+    role?: UserRole;
   };
 
   return {
     uid: currentUser.uid,
     fullName: data.fullName?.trim() || fallbackName,
-    photoURL: data.photoURL ?? currentUser.photoURL ?? null
+    photoURL: data.photoURL ?? currentUser.photoURL ?? null,
+    role: data.role ?? DEFAULT_USER_ROLE
   };
 }
 

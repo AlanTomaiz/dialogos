@@ -12,6 +12,7 @@ import { EventQRCodeModal } from '../../components/EventQRCodeModal/EventQRCodeM
 import { QRCodeScannerScreen } from '../../components/QRCodeScannerScreen/QRCodeScannerScreen';
 import { MODAL_NAMESPACE } from '../../config/modals';
 import { useDialEvents } from '../../hooks/useDialEvents';
+import { useEventAvailability } from '../../hooks/useEventAvailability';
 import { useLoggedUserProfile } from '../../hooks/useLoggedUserProfile';
 import { useModalManager } from '../../hooks/useModalManager';
 import { useToast } from '../../hooks/useToast';
@@ -38,8 +39,11 @@ export function Home() {
   const {
     uid: loggedUserUid,
     fullName: loggedUserName,
-    photoURL: loggedUserPhotoUrl
+    photoURL: loggedUserPhotoUrl,
+    role: loggedUserRole
   } = useLoggedUserProfile();
+
+  const isAdmin = loggedUserRole === 'ADMIN';
 
   const handleEventsLoadError = useCallback(() => {
     toast.show('Falha ao carregar eventos do Firebase.', 'error');
@@ -48,10 +52,23 @@ export function Home() {
   const { events, checkedEventIds, createEvent, registerEventParticipant } =
     useDialEvents(handleEventsLoadError);
 
+  const isSelectedEventChecked =
+    selectedEvent !== null && checkedEventIds.has(selectedEvent.id);
+
+  const { isAvailable: isSelectedEventAvailable } =
+    useEventAvailability(selectedEvent);
+
+  const canPresentSelectedEventQRCode = Boolean(
+    selectedEvent &&
+    loggedUserUid &&
+    isAdmin &&
+    selectedEvent.creatorUid === loggedUserUid
+  );
+
   function handleConfirmPresence(): void {
     if (!selectedEvent) return;
 
-    const isValidEvent = !isWithinEventTimeWindow(
+    const isValidEvent = isWithinEventTimeWindow(
       selectedEvent.timeRange,
       selectedEvent.createdAt
     );
@@ -64,6 +81,26 @@ export function Home() {
     setSelectedEvent(null);
     closeModal(MODAL_NAMESPACE.EVENT_DETAIL);
     openModal(MODAL_NAMESPACE.EVENT_SCANNER);
+  }
+
+  function handlePresentEventQRCode(): void {
+    if (!selectedEvent) return;
+
+    if (
+      !loggedUserUid ||
+      !isAdmin ||
+      selectedEvent.creatorUid !== loggedUserUid
+    ) {
+      toast.show(
+        'Somente administradores criadores do evento podem apresentar o QR Code.',
+        'error'
+      );
+      return;
+    }
+
+    setQrCodeEvent({ id: selectedEvent.id, title: selectedEvent.title });
+    closeModal(MODAL_NAMESPACE.EVENT_DETAIL);
+    openModal(MODAL_NAMESPACE.EVENT_QR_CODE);
   }
 
   async function handleScanned(rawValue: string): Promise<void> {
@@ -105,6 +142,11 @@ export function Home() {
   }
 
   async function handleCreateEvent(input: EventCreateInput): Promise<void> {
+    if (!isAdmin) {
+      toast.show('Apenas administradores podem criar eventos.', 'error');
+      return;
+    }
+
     const validation = validateEventCreateInput(input);
 
     if (!validation.valid) {
@@ -146,7 +188,7 @@ export function Home() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <Text style={styles.headerTitle}>Encontros</Text>
       </View>
 
@@ -201,6 +243,13 @@ export function Home() {
         visible={isOpen(MODAL_NAMESPACE.EVENT_QR_CODE)}
         eventId={qrCodeEvent?.id ?? ''}
         eventTitle={qrCodeEvent?.title ?? ''}
+        requesterUid={loggedUserUid}
+        requesterRole={loggedUserRole}
+        onLoadError={(message) => {
+          toast.show(message, 'error');
+          setQrCodeEvent(null);
+          closeModal(MODAL_NAMESPACE.EVENT_QR_CODE);
+        }}
         onClose={() => {
           setQrCodeEvent(null);
           closeModal(MODAL_NAMESPACE.EVENT_QR_CODE);
@@ -214,7 +263,20 @@ export function Home() {
           setSelectedEvent(null);
           closeModal(MODAL_NAMESPACE.EVENT_DETAIL);
         }}
-        onConfirmPresence={handleConfirmPresence}
+        onPrimaryAction={
+          canPresentSelectedEventQRCode
+            ? handlePresentEventQRCode
+            : handleConfirmPresence
+        }
+        primaryActionLabel={
+          canPresentSelectedEventQRCode
+            ? 'Apresentar QRCode'
+            : 'Registrar presença'
+        }
+        showPrimaryAction={
+          canPresentSelectedEventQRCode ||
+          (!isSelectedEventChecked && isSelectedEventAvailable)
+        }
       />
 
       <QRCodeScannerScreen
@@ -223,12 +285,14 @@ export function Home() {
         onScanned={handleScanned}
       />
 
-      <TouchableOpacity
-        style={[styles.fab, { bottom: bottomOffset + Spacing.base }]}
-        onPress={() => openModal(MODAL_NAMESPACE.EVENT_CREATE)}
-      >
-        <Plus size={26} color={Colors.WHITE} strokeWidth={2.5} />
-      </TouchableOpacity>
+      {isAdmin && (
+        <TouchableOpacity
+          style={[styles.fab, { bottom: bottomOffset + Spacing.base }]}
+          onPress={() => openModal(MODAL_NAMESPACE.EVENT_CREATE)}
+        >
+          <Plus size={26} color={Colors.WHITE} strokeWidth={2.5} />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
