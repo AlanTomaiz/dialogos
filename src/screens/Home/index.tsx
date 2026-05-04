@@ -226,7 +226,7 @@ export function Home({ onNavigateToProfile }: HomeProps) {
         <TouchableOpacity
           style={styles.headerAction}
           onPress={onNavigateToProfile}
-          accessibilityLabel="Acessar perfil"
+          accessibilityLabel="Abrir configuracoes"
           accessibilityRole="button"
         >
           <UserCircle size={28} color={Colors.TITLE} strokeWidth={1.5} />

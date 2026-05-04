@@ -11,6 +11,7 @@ import {
   getReactNativePersistence,
   initializeAuth,
   signInWithEmailAndPassword,
+  signOut,
   type Auth
 } from 'firebase/auth';
 import {
@@ -62,9 +63,7 @@ export {
   query,
   runTransaction,
   serverTimestamp,
-  setDoc,
-  signInWithEmailAndPassword,
-  updateDoc,
+  setDoc, signInWithEmailAndPassword, signOut, updateDoc,
   where
 };
 

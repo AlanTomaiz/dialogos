@@ -7,8 +7,11 @@ import {
   serverTimestamp,
   setDoc,
   signInWithEmailAndPassword,
+  signOut,
+  updateDoc,
   type FirebaseError
 } from '../libs/firebase';
+import { clearCachedUserProfile } from '../utils/userProfileStorage';
 
 export type UserRole = 'ADMIN' | 'MEMBER';
 export type UserStatus = 'ACTIVE' | 'INACTIVE';
@@ -238,5 +241,38 @@ export async function signInWithRA(
     }
   } catch (error) {
     throw new Error(getFriendlyAuthErrorMessage(error, 'Falha ao entrar.'));
+  }
+}
+
+export async function signOutCurrentUser(): Promise<void> {
+  try {
+    await clearCachedUserProfile();
+    await signOut(auth);
+  } catch (error) {
+    throw new Error(
+      getFriendlyAuthErrorMessage(error, 'Falha ao encerrar a sessao.')
+    );
+  }
+}
+
+export async function deactivateCurrentUserAccount(): Promise<void> {
+  const currentUser = auth.currentUser;
+
+  if (!currentUser) {
+    throw new Error('Usuario logado nao encontrado.');
+  }
+
+  try {
+    const userRef = doc(firestore, 'dial_users', currentUser.uid);
+
+    await updateDoc(userRef, {
+      status: 'INACTIVE'
+    });
+
+    await signOutCurrentUser();
+  } catch (error) {
+    throw new Error(
+      getFriendlyAuthErrorMessage(error, 'Falha ao desativar a conta.')
+    );
   }
 }

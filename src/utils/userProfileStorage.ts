@@ -43,3 +43,12 @@ export async function cacheUserProfile(
 
   await AsyncStorage.setItem(USER_PROFILE_STORAGE_KEY, serialized);
 }
+
+export async function clearCachedUserProfile(): Promise<void> {
+  if (Platform.OS === 'web') {
+    window.localStorage.removeItem(USER_PROFILE_STORAGE_KEY);
+    return;
+  }
+
+  await AsyncStorage.removeItem(USER_PROFILE_STORAGE_KEY);
+}
