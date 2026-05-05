@@ -10,6 +10,7 @@ import {
   getAuth,
   getReactNativePersistence,
   initializeAuth,
+  onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
   type Auth
@@ -58,14 +59,17 @@ export {
   doc,
   getDoc,
   getDocs,
+  onAuthStateChanged,
   onSnapshot,
   orderBy,
   query,
   runTransaction,
   serverTimestamp,
-  setDoc, signInWithEmailAndPassword, signOut, updateDoc,
+  setDoc,
+  signInWithEmailAndPassword,
+  signOut,
+  updateDoc,
   where
 };
 
-  export type { FirebaseError, Unsubscribe };
-
+export type { FirebaseError, Unsubscribe };

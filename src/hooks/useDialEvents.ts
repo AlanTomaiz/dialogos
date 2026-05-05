@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { EventData } from '../components/EventCard/EventCard';
-import { auth } from '../libs/firebase';
+import { auth, onAuthStateChanged } from '../libs/firebase';
 import {
   createDialEvent,
   getEventParticipants,
@@ -25,12 +25,16 @@ export function useDialEvents(onLoadError?: () => void) {
   }, [onLoadError]);
 
   useEffect(() => {
-    const uid = auth.currentUser?.uid;
-    if (!uid) return;
+    return onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        setCheckedEventIds(new Set());
+        return;
+      }
 
-    getUserCheckedEventIds(uid)
-      .then((ids) => setCheckedEventIds(new Set(ids)))
-      .catch(() => {});
+      getUserCheckedEventIds(user.uid)
+        .then((ids) => setCheckedEventIds(new Set(ids)))
+        .catch(() => {});
+    });
   }, []);
 
   const createEvent = useCallback(
