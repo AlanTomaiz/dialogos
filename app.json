@@ -3,7 +3,10 @@
     "name": "Diálogos",
     "slug": "dialogos",
     "version": "1.0.0",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -23,7 +26,7 @@
       "runtimeVersion": {
         "policy": "appVersion"
       },
-      "buildNumber": "2"
+      "buildNumber": "3"
     },
     "android": {
       "package": "com.unicesumar.dialogos",
