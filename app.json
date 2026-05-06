@@ -3,17 +3,18 @@
     "name": "Diálogos",
     "slug": "dialogos",
     "version": "1.0.0",
+    "platforms": ["ios", "android"],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash-logo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#FDB640"
     },
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.unicesumar.dialogos",
       "infoPlist": {
         "NSCameraUsageDescription": "Este app usa a câmera para leitura de QR Codes.",
@@ -28,7 +29,7 @@
       "package": "com.unicesumar.dialogos",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0B102F"
+        "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -76,7 +77,7 @@
       "url": "https://u.expo.dev/64bf8404-64b0-4f83-a9d4-1a7f85749026"
     },
     "runtimeVersion": {
-      "policy": "appVersion"
+      "policy": "sdkVersion"
     }
   }
 }
