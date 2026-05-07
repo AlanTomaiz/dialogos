@@ -4,9 +4,10 @@ import { auth, onAuthStateChanged } from '../libs/firebase';
 import {
   createDialEvent,
   getEventParticipants,
-  getUserCheckedEventIds,
+  getUserCheckedEventIdsByEventIds,
   registerParticipant,
   subscribeDialEvents,
+  subscribeUserCheckedEventIds,
   type CreateDialEventInput,
   type ParticipantData,
   type RegisterParticipantResult
@@ -18,6 +19,10 @@ export function useDialEvents(onLoadError?: () => void) {
     new Set()
   );
 
+  const [loggedUserUid, setLoggedUserUid] = useState<string | null>(
+    auth.currentUser?.uid ?? null
+  );
+
   useEffect(() => {
     return subscribeDialEvents(setEvents, () => {
       onLoadError?.();
@@ -27,15 +32,53 @@ export function useDialEvents(onLoadError?: () => void) {
   useEffect(() => {
     return onAuthStateChanged(auth, (user) => {
       if (!user) {
+        setLoggedUserUid(null);
         setCheckedEventIds(new Set());
         return;
       }
 
-      getUserCheckedEventIds(user.uid)
-        .then((ids) => setCheckedEventIds(new Set(ids)))
-        .catch(() => {});
+      setLoggedUserUid(user.uid);
     });
   }, []);
+
+  const syncCheckedEventIdsFallback = useCallback(
+    async (uid: string): Promise<void> => {
+      const ids = await getUserCheckedEventIdsByEventIds(
+        uid,
+        events.map((event) => event.id)
+      );
+
+      setCheckedEventIds(new Set(ids));
+    },
+    [events]
+  );
+
+  useEffect(() => {
+    if (!loggedUserUid) {
+      setCheckedEventIds(new Set());
+      return;
+    }
+
+    const unsubscribe = subscribeUserCheckedEventIds(
+      loggedUserUid,
+      (ids) => {
+        setCheckedEventIds(new Set(ids));
+      },
+      () => {
+        void syncCheckedEventIdsFallback(loggedUserUid).catch(() => {});
+      }
+    );
+
+    return unsubscribe;
+  }, [loggedUserUid, syncCheckedEventIdsFallback]);
+
+  useEffect(() => {
+    if (!loggedUserUid) {
+      return;
+    }
+
+    void syncCheckedEventIdsFallback(loggedUserUid).catch(() => {});
+  }, [loggedUserUid, syncCheckedEventIdsFallback]);
 
   const createEvent = useCallback(
     async (input: CreateDialEventInput): Promise<string> => {

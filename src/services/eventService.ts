@@ -1,6 +1,5 @@
 import type { EventData } from '../components/EventCard/EventCard';
 import {
-  addDoc,
   collection,
   collectionGroup,
   doc,
@@ -73,20 +72,49 @@ export function subscribeDialEvents(
 export async function createDialEvent(
   input: CreateDialEventInput
 ): Promise<string> {
-  const docRef = await addDoc(collection(firestore, 'dial_events'), {
-    title: input.title,
-    timeRange: input.timeRange,
-    duration: input.duration,
-    location: input.location,
-    creatorUid: input.creatorUid,
-    creatorName: input.creatorName,
-    creatorPhotoUrl: input.creatorPhotoUrl,
-    description: input.description,
-    isActive: true,
-    createdAt: serverTimestamp()
+  const eventRef = doc(collection(firestore, 'dial_events'));
+
+  await runTransaction(firestore, async (transaction) => {
+    const userRef = doc(firestore, 'dial_users', input.creatorUid);
+    const userSnap = await transaction.get(userRef);
+
+    const profileFullName = userSnap.exists()
+      ? ((userSnap.data() as { fullName?: string }).fullName ?? null)
+      : null;
+
+    const trimmedCreatorName = input.creatorName.trim();
+    const participantFullName = profileFullName ?? (trimmedCreatorName || null);
+
+    transaction.set(eventRef, {
+      title: input.title,
+      timeRange: input.timeRange,
+      duration: input.duration,
+      location: input.location,
+      creatorUid: input.creatorUid,
+      creatorName: input.creatorName,
+      creatorPhotoUrl: input.creatorPhotoUrl,
+      description: input.description,
+      isActive: true,
+      createdAt: serverTimestamp()
+    });
+
+    const creatorParticipantRef = doc(
+      firestore,
+      'dial_events',
+      eventRef.id,
+      'participants',
+      input.creatorUid
+    );
+
+    transaction.set(creatorParticipantRef, {
+      uid: input.creatorUid,
+      fullName: participantFullName,
+      joinedAt: serverTimestamp(),
+      checked: true
+    });
   });
 
-  return docRef.id;
+  return eventRef.id;
 }
 
 export type RegisterParticipantResult =
@@ -231,6 +259,58 @@ export async function getUserCheckedEventIds(uid: string): Promise<string[]> {
   return snap.docs
     .map((d) => d.ref.parent.parent?.id)
     .filter((id): id is string => Boolean(id));
+}
+
+export function subscribeUserCheckedEventIds(
+  uid: string,
+  onIds: (ids: string[]) => void,
+  onError: () => void
+): Unsubscribe {
+  const checkedEventsQuery = query(
+    collectionGroup(firestore, 'participants'),
+    where('uid', '==', uid)
+  );
+
+  return onSnapshot(
+    checkedEventsQuery,
+    (snapshot) => {
+      const uniqueEventIds = Array.from(
+        new Set(
+          snapshot.docs
+            .map((d) => d.ref.parent.parent?.id)
+            .filter((id): id is string => Boolean(id))
+        )
+      );
+
+      onIds(uniqueEventIds);
+    },
+    () => {
+      onError();
+    }
+  );
+}
+
+export async function getUserCheckedEventIdsByEventIds(
+  uid: string,
+  eventIds: string[]
+): Promise<string[]> {
+  const uniqueEventIds = Array.from(
+    new Set(eventIds.map((eventId) => eventId.trim()).filter(Boolean))
+  );
+
+  if (uniqueEventIds.length === 0) {
+    return [];
+  }
+
+  const participantSnapshots = await Promise.all(
+    uniqueEventIds.map((eventId) =>
+      getDoc(doc(firestore, 'dial_events', eventId, 'participants', uid))
+    )
+  );
+
+  return uniqueEventIds.filter((_, index) =>
+    participantSnapshots[index].exists()
+  );
 }
 
 export async function getOrCreateEventQRCodePayload(
