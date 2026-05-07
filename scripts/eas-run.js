@@ -1,53 +1,33 @@
 #!/usr/bin/env node
-
-/**
- * npm run eas:run -- ios preview
- * npm run eas:run -- ios build
- * npm run eas:run -- ios build preview
- * npm run eas:run -- ios build production
- * npm run eas:run -- ios submit
- * npm run eas:run -- android build
- * npm run eas:run -- android build preview
- * npm run eas:run -- android build production
- * npm run eas:run -- android preview
- * npm run eas:run -- android submit
- * npm run eas:run -- all preview
- * npm run eas:run -- all build
- * npm run eas:run -- all build preview
- * npm run eas:run -- all build production
- * npm run eas:run -- all submit
- */
-
 const { spawnSync } = require('child_process');
 
 const args = process.argv.slice(2);
 const HELP_FLAGS = new Set(['-h', '--help']);
 
 function printUsage() {
-  console.log('Uso: npm run eas:run -- <ios|android|all> <preview|build|submit> [perfil] [args extras]');
+  const c = (cmd) => `  npm run eas:run -- ${cmd}`;
+  const lines = [
+    ['ios build',           'Build iOS produção'],
+    ['android build',       'Build Android produção'],
+    ['build',               'Build iOS + Android produção'],
+    ['ios build preview',   'Build iOS preview'],
+    ['android build preview','Build Android preview'],
+    ['build preview',       'Build iOS + Android preview'],
+    ['update ios',          'OTA produção iOS'],
+    ['update android',      'OTA produção Android'],
+    ['update',              'OTA produção iOS + Android'],
+    ['preview ios',         'OTA preview iOS'],
+    ['preview android',     'OTA preview Android'],
+    ['preview',             'OTA preview iOS + Android'],
+    ['submit prod ios',     'Submit iOS produção'],
+  ];
+
+  const cmdWidth = Math.max(...lines.map(([cmd]) => cmd.length));
+  console.log('Comandos disponíveis:\n');
+  for (const [cmd, desc] of lines) {
+    console.log(`${c(cmd).padEnd(cmdWidth + 22)}  ${desc}`);
+  }
   console.log('');
-  console.log('Plataformas:');
-  console.log('  ios         Executar apenas para iOS');
-  console.log('  android     Executar apenas para Android');
-  console.log('  all         Executar para Android e iOS');
-  console.log('');
-  console.log('Modos:');
-  console.log('  preview     Enviar atualização OTA via eas update');
-  console.log('  build       Gerar build via eas build');
-  console.log('  submit      Submeter build às app stores via eas submit');
-  console.log('');
-  console.log('Perfis (apenas para build e submit, padrão: production):');
-  console.log('  production  Perfil de produção');
-  console.log('  preview     Perfil de preview');
-  console.log('');
-  console.log('Exemplos:');
-  console.log('  npm run eas:run -- ios preview');
-  console.log('  npm run eas:run -- android build');
-  console.log('  npm run eas:run -- ios build preview');
-  console.log('  npm run eas:run -- all preview');
-  console.log('  npm run eas:run -- all build');
-  console.log('  npm run eas:run -- all build preview');
-  console.log('  npm run eas:run -- ios submit');
 }
 
 if (args.length === 0 || HELP_FLAGS.has(args[0])) {
@@ -55,37 +35,122 @@ if (args.length === 0 || HELP_FLAGS.has(args[0])) {
   process.exit(0);
 }
 
-const [platformArg, modeArg, ...restArgs] = args;
-const platform = (platformArg || '').toLowerCase();
-const mode = (modeArg || '').toLowerCase();
-const profileArg = (restArgs[0] || '').toLowerCase();
+const SUPPORTED_PLATFORMS = new Set(['ios', 'android', 'all']);
 
-if (!['ios', 'android', 'all'].includes(platform)) {
-  console.error(`Plataforma inválida: "${platformArg}"`);
+function resolveExecution(inputArgs) {
+  const first = (inputArgs[0] || '').toLowerCase();
+  const second = (inputArgs[1] || '').toLowerCase();
+  const third = (inputArgs[2] || '').toLowerCase();
+
+  if (SUPPORTED_PLATFORMS.has(first) && second === 'build') {
+    const profile = third === 'preview' ? 'preview' : 'production';
+    const extraArgs = third === 'preview' ? inputArgs.slice(3) : inputArgs.slice(2);
+    return {
+      action: 'build',
+      platform: first,
+      profile,
+      channel: null,
+      extraArgs
+    };
+  }
+
+  if (first === 'build') {
+    const profile = second === 'preview' ? 'preview' : 'production';
+    const extraArgs = second === 'preview' ? inputArgs.slice(2) : inputArgs.slice(1);
+    return {
+      action: 'build',
+      platform: 'all',
+      profile,
+      channel: null,
+      extraArgs
+    };
+  }
+
+  if (first === 'update') {
+    const platform = SUPPORTED_PLATFORMS.has(second) ? second : 'all';
+    const extraArgs = SUPPORTED_PLATFORMS.has(second)
+      ? inputArgs.slice(2)
+      : inputArgs.slice(1);
+    return {
+      action: 'update',
+      platform,
+      profile: null,
+      channel: 'production',
+      extraArgs
+    };
+  }
+
+  if (first === 'preview') {
+    const platform = SUPPORTED_PLATFORMS.has(second) ? second : 'all';
+    const extraArgs = SUPPORTED_PLATFORMS.has(second)
+      ? inputArgs.slice(2)
+      : inputArgs.slice(1);
+    return {
+      action: 'update',
+      platform,
+      profile: null,
+      channel: 'preview',
+      extraArgs
+    };
+  }
+
+  if (first === 'submit') {
+    if (second !== 'prod' || third !== 'ios') {
+      console.error('Submit permitido apenas como: npm run eas:run -- submit prod ios');
+      printUsage();
+      process.exit(1);
+    }
+
+    return {
+      action: 'submit',
+      platform: 'ios',
+      profile: 'production',
+      channel: null,
+      extraArgs: inputArgs.slice(3)
+    };
+  }
+
+  console.error(`Comando inválido: "${inputArgs.join(' ')}"`);
   printUsage();
   process.exit(1);
 }
 
-if (!['preview', 'build', 'submit'].includes(mode)) {
-  console.error(`Modo inválido: "${modeArg}"`);
-  printUsage();
-  process.exit(1);
-}
-
-const explicitProfile = (mode === 'build' || mode === 'submit') && ['preview', 'production'].includes(profileArg);
-const profile = explicitProfile ? profileArg : 'production';
-const extraArgs = explicitProfile ? restArgs.slice(1) : restArgs;
+const execution = resolveExecution(args);
 
 const easCommand = process.platform === 'win32' ? 'npx.cmd' : 'npx';
 
 function runEas(platformToRun) {
   let easArgs;
-  if (mode === 'preview') {
-    easArgs = ['eas', 'update', '--platform', platformToRun, '--channel', 'preview', ...extraArgs];
-  } else if (mode === 'build') {
-    easArgs = ['eas', 'build', '--platform', platformToRun, '--profile', profile, ...extraArgs];
-  } else if (mode === 'submit') {
-    easArgs = ['eas', 'submit', '--platform', platformToRun, '--profile', profile, ...extraArgs];
+  if (execution.action === 'update') {
+    easArgs = [
+      'eas',
+      'update',
+      '--platform',
+      platformToRun,
+      '--channel',
+      execution.channel,
+      ...execution.extraArgs
+    ];
+  } else if (execution.action === 'build') {
+    easArgs = [
+      'eas',
+      'build',
+      '--platform',
+      platformToRun,
+      '--profile',
+      execution.profile,
+      ...execution.extraArgs
+    ];
+  } else if (execution.action === 'submit') {
+    easArgs = [
+      'eas',
+      'submit',
+      '--platform',
+      platformToRun,
+      '--profile',
+      execution.profile,
+      ...execution.extraArgs
+    ];
   }
   console.log(`Running: ${easCommand} ${easArgs.join(' ')}`);
   const result = spawnSync(easCommand, easArgs, {
@@ -101,7 +166,8 @@ function runEas(platformToRun) {
   }
 }
 
-const platforms = platform === 'all' ? ['android', 'ios'] : [platform];
+const platforms =
+  execution.platform === 'all' ? ['android', 'ios'] : [execution.platform];
 for (const p of platforms) {
   runEas(p);
 }
