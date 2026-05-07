@@ -2,11 +2,16 @@ import { StyleSheet } from 'react-native';
 import { Colors, Radius, Spacing, Typography } from '../../theme';
 
 export const styles = StyleSheet.create({
-  container: {
+  keyboardAvoidingView: {
     flex: 1,
+    backgroundColor: Colors.WHITE
+  },
+  container: {
+    flexGrow: 1,
     backgroundColor: Colors.WHITE,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    paddingVertical: Spacing.xl
   },
   title: {
     textAlign: 'center',

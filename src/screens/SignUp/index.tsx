@@ -1,11 +1,14 @@
 import { Hash, Lock, Mail, User } from 'lucide-react-native';
 import { useState } from 'react';
 import {
-  ActivityIndicator,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { useToast } from '../../hooks/useToast';
 import { registerWithRA } from '../../services/authService';
@@ -52,8 +55,16 @@ export function SignUp({ onNavigateToLogin, onSignUpSuccess }: SignUpProps) {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Criar Conta</Text>
+    <KeyboardAvoidingView
+      style={styles.keyboardAvoidingView}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.title}>Criar Conta</Text>
       <View style={styles.fieldWrap}>
         <User size={16} color={Colors.MUTED} strokeWidth={2} />
         <TextInput
@@ -121,6 +132,7 @@ export function SignUp({ onNavigateToLogin, onSignUpSuccess }: SignUpProps) {
           Entrar
         </Text>
       </Text>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

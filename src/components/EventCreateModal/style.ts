@@ -15,8 +15,11 @@ export const styles = StyleSheet.create({
     borderTopLeftRadius: Radius.xl,
     borderTopRightRadius: Radius.xl,
     paddingHorizontal: Spacing.base,
-    paddingTop: Spacing.md,
-    gap: Spacing.base
+    paddingTop: Spacing.md
+  },
+  scrollContent: {
+    gap: Spacing.base,
+    paddingBottom: Spacing.base
   },
   handle: {
     width: 40,
@@ -86,5 +89,8 @@ export const styles = StyleSheet.create({
     fontFamily: Typography.family.bold,
     fontSize: Typography.size.base,
     color: Colors.WHITE
+  },
+  primaryButtonLoading: {
+    opacity: 0.7
   }
 });

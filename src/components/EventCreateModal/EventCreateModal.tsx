@@ -1,5 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Modal, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '../../theme';
 import type { EventCreateInput } from './EventCreateModal.type';
@@ -84,7 +94,10 @@ export function EventCreateModal({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View style={styles.container}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
         <TouchableOpacity
           style={styles.overlay}
           activeOpacity={1}
@@ -93,74 +106,84 @@ export function EventCreateModal({
         <View style={[styles.sheet, { paddingBottom: insets.bottom + 16 }]}>
           <View style={styles.handle} />
           <Text style={styles.title}>Novo evento</Text>
-
-          <TextInput
-            style={styles.input}
-            placeholder="Titulo"
-            placeholderTextColor={Colors.MUTED}
-            value={form.title}
-            onChangeText={(value) => updateField('title', value)}
-          />
-
-          <TextInput
-            style={[styles.input, styles.descriptionInput]}
-            placeholder="Descricao"
-            placeholderTextColor={Colors.MUTED}
-            multiline
-            value={form.description}
-            onChangeText={(value) => updateField('description', value)}
-          />
-
-          <View style={styles.timeRow}>
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContent}
+          >
             <TextInput
-              style={[styles.input, styles.timeInput]}
-              placeholder="De (08:00)"
+              style={styles.input}
+              placeholder="Titulo"
               placeholderTextColor={Colors.MUTED}
-              keyboardType="number-pad"
-              maxLength={5}
-              value={form.timeStart}
-              onChangeText={(value) => updateTimeField('timeStart', value)}
+              value={form.title}
+              onChangeText={(value) => updateField('title', value)}
             />
+
             <TextInput
-              style={[styles.input, styles.timeInput]}
-              placeholder="Ate (10:00)"
+              style={[styles.input, styles.descriptionInput]}
+              placeholder="Descricao"
               placeholderTextColor={Colors.MUTED}
-              keyboardType="number-pad"
-              maxLength={5}
-              value={form.timeEnd}
-              onChangeText={(value) => updateTimeField('timeEnd', value)}
+              multiline
+              value={form.description}
+              onChangeText={(value) => updateField('description', value)}
             />
-          </View>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Local"
-            placeholderTextColor={Colors.MUTED}
-            value={form.location}
-            onChangeText={(value) => updateField('location', value)}
-          />
+            <View style={styles.timeRow}>
+              <TextInput
+                style={[styles.input, styles.timeInput]}
+                placeholder="De (08:00)"
+                placeholderTextColor={Colors.MUTED}
+                keyboardType="number-pad"
+                maxLength={5}
+                value={form.timeStart}
+                onChangeText={(value) => updateTimeField('timeStart', value)}
+              />
+              <TextInput
+                style={[styles.input, styles.timeInput]}
+                placeholder="Ate (10:00)"
+                placeholderTextColor={Colors.MUTED}
+                keyboardType="number-pad"
+                maxLength={5}
+                value={form.timeEnd}
+                onChangeText={(value) => updateTimeField('timeEnd', value)}
+              />
+            </View>
 
-          <View style={styles.actions}>
-            <TouchableOpacity
-              style={styles.secondaryButton}
-              onPress={onClose}
-              disabled={isSubmitting}
-            >
-              <Text style={styles.secondaryButtonText}>Cancelar</Text>
-            </TouchableOpacity>
+            <TextInput
+              style={styles.input}
+              placeholder="Local"
+              placeholderTextColor={Colors.MUTED}
+              value={form.location}
+              onChangeText={(value) => updateField('location', value)}
+            />
 
-            <TouchableOpacity
-              style={styles.primaryButton}
-              onPress={handleSubmit}
-              disabled={isSubmitting}
-            >
-              <Text style={styles.primaryButtonText}>
-                {isSubmitting ? 'Criando...' : 'Criar'}
-              </Text>
-            </TouchableOpacity>
-          </View>
+            <View style={styles.actions}>
+              <TouchableOpacity
+                style={styles.secondaryButton}
+                onPress={onClose}
+                disabled={isSubmitting}
+              >
+                <Text style={styles.secondaryButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.primaryButton,
+                  isSubmitting && styles.primaryButtonLoading
+                ]}
+                onPress={handleSubmit}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <ActivityIndicator color={styles.primaryButtonText.color} />
+                ) : (
+                  <Text style={styles.primaryButtonText}>Criar</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
