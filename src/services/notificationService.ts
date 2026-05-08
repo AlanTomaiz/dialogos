@@ -1,7 +1,9 @@
+import { USER_DEACTIVATED_MESSAGE } from '../config/messages';
 import {
   collection,
   doc,
   firestore,
+  getDoc,
   getDocs,
   updateDoc
 } from '../libs/firebase';
@@ -42,5 +44,26 @@ export async function broadcastNewEventNotification(
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(messages)
+  });
+}
+
+export async function sendDeactivationNotification(uid: string): Promise<void> {
+  const userDoc = await getDoc(doc(firestore, 'dial_users', uid));
+  const userData = userDoc.data() as { pushToken?: string } | undefined;
+
+  if (!userData?.pushToken) {
+    return;
+  }
+
+  const message = {
+    to: userData.pushToken,
+    sound: 'default',
+    body: USER_DEACTIVATED_MESSAGE
+  };
+
+  await fetch(EXPO_PUSH_API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify([message])
   });
 }
