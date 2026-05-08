@@ -1,3 +1,8 @@
+import {
+  EVENT_FORM_END_AFTER_START,
+  EVENT_FORM_FILL_REQUIRED,
+  EVENT_FORM_INVALID_TIME_FORMAT
+} from '../../config/messages';
 import type { EventCreateInput } from './EventCreateModal.type';
 
 const TIME_PATTERN = /^([01]\d|2[0-3]):([0-5]\d)$/;
@@ -18,7 +23,7 @@ export function validateEventCreateInput(
   ) {
     return {
       valid: false,
-      message: 'Preencha titulo, descricao, horario e local.',
+      message: EVENT_FORM_FILL_REQUIRED,
       severity: 'warning'
     };
   }
@@ -29,7 +34,7 @@ export function validateEventCreateInput(
   ) {
     return {
       valid: false,
-      message: 'Informe horario valido no formato HH:MM.',
+      message: EVENT_FORM_INVALID_TIME_FORMAT,
       severity: 'warning'
     };
   }
@@ -46,7 +51,7 @@ export function validateEventCreateInput(
   if (endInMinutes <= startInMinutes) {
     return {
       valid: false,
-      message: 'Horario final deve ser maior que o inicial no mesmo dia.',
+      message: EVENT_FORM_END_AFTER_START,
       severity: 'warning'
     };
   }

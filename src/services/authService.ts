@@ -1,4 +1,23 @@
 import {
+  AUTH_DEACTIVATE_FAILED,
+  AUTH_INVALID_RA_REGISTRATION,
+  AUTH_PROVIDE_IDENTIFIER,
+  AUTH_RA_ALREADY_REGISTERED,
+  AUTH_RA_NOT_FOUND,
+  AUTH_REGISTER_FAILED,
+  AUTH_SIGN_IN_FAILED,
+  AUTH_SIGN_OUT_FAILED,
+  AUTH_USER_NOT_FOUND,
+  FIREBASE_CONFIG_NOT_FOUND,
+  FIREBASE_EMAIL_IN_USE,
+  FIREBASE_INVALID_CREDENTIAL,
+  FIREBASE_INVALID_EMAIL,
+  FIREBASE_NETWORK_FAILED,
+  FIREBASE_TOO_MANY_REQUESTS,
+  FIREBASE_WEAK_PASSWORD,
+  USER_DEACTIVATED_MESSAGE
+} from '../config/messages';
+import {
   auth,
   createUserWithEmailAndPassword,
   doc,
@@ -68,26 +87,26 @@ function getFriendlyAuthErrorMessage(
   const firebaseError = error as FirebaseError;
 
   if (error.message.includes('CONFIGURATION_NOT_FOUND')) {
-    return 'Configuracao do Firebase Auth nao encontrada. Verifique se o projeto, a API key e o provedor Email/Senha estao configurados corretamente.';
+    return FIREBASE_CONFIG_NOT_FOUND;
   }
 
   switch (firebaseError.code) {
     case 'auth/configuration-not-found':
-      return 'Configuracao do Firebase Auth nao encontrada. Verifique se o projeto, a API key e o provedor Email/Senha estao configurados corretamente.';
+      return FIREBASE_CONFIG_NOT_FOUND;
     case 'auth/email-already-in-use':
-      return 'Este e-mail ja esta em uso.';
+      return FIREBASE_EMAIL_IN_USE;
     case 'auth/invalid-email':
-      return 'Informe um e-mail valido.';
+      return FIREBASE_INVALID_EMAIL;
     case 'auth/weak-password':
-      return 'A senha deve ter pelo menos 6 caracteres.';
+      return FIREBASE_WEAK_PASSWORD;
     case 'auth/invalid-credential':
     case 'auth/wrong-password':
     case 'auth/user-not-found':
-      return 'E-mail/RA ou senha invalidos.';
+      return FIREBASE_INVALID_CREDENTIAL;
     case 'auth/too-many-requests':
-      return 'Muitas tentativas. Tente novamente em instantes.';
+      return FIREBASE_TOO_MANY_REQUESTS;
     case 'auth/network-request-failed':
-      return 'Falha de conexao. Verifique sua internet.';
+      return FIREBASE_NETWORK_FAILED;
     default:
       return error.message || fallbackMessage;
   }
@@ -152,7 +171,7 @@ export async function registerWithRA(input: RegisterInput): Promise<void> {
     const existingRA = await getDoc(raIndexRef);
 
     if (existingRA.exists()) {
-      throw new Error('RA ja cadastrado.');
+      throw new Error(AUTH_RA_ALREADY_REGISTERED);
     }
 
     const credential = await createUserWithEmailAndPassword(
@@ -183,9 +202,7 @@ export async function registerWithRA(input: RegisterInput): Promise<void> {
     await setDoc(doc(firestore, 'dial_users', uid), userDoc);
     await setDoc(raIndexRef, raIndexDoc);
   } catch (error) {
-    throw new Error(
-      getFriendlyAuthErrorMessage(error, 'Falha ao criar conta.')
-    );
+    throw new Error(getFriendlyAuthErrorMessage(error, AUTH_REGISTER_FAILED));
   }
 }
 
@@ -197,7 +214,7 @@ export async function signInWithRA(
     const normalizedIdentifier = identifier.trim().toLowerCase();
 
     if (!normalizedIdentifier) {
-      throw new Error('Informe o RA ou e-mail para entrar.');
+      throw new Error(AUTH_PROVIDE_IDENTIFIER);
     }
 
     let credential;
@@ -215,12 +232,12 @@ export async function signInWithRA(
       const raIndexSnap = await getDoc(raIndexRef);
 
       if (!raIndexSnap.exists()) {
-        throw new Error('RA nao encontrado.');
+        throw new Error(AUTH_RA_NOT_FOUND);
       }
 
       const data = raIndexSnap.data() as { email?: string; uid?: string };
       if (!data.email) {
-        throw new Error('Cadastro de RA invalido.');
+        throw new Error(AUTH_INVALID_RA_REGISTRATION);
       }
 
       credential = await signInWithEmailAndPassword(auth, data.email, password);
@@ -236,11 +253,11 @@ export async function signInWithRA(
       };
 
       if (userData.status === 'INACTIVE') {
-        throw new Error('Usuario inativo. Contate um administrador.');
+        throw new Error(USER_DEACTIVATED_MESSAGE);
       }
     }
   } catch (error) {
-    throw new Error(getFriendlyAuthErrorMessage(error, 'Falha ao entrar.'));
+    throw new Error(getFriendlyAuthErrorMessage(error, AUTH_SIGN_IN_FAILED));
   }
 }
 
@@ -249,9 +266,7 @@ export async function signOutCurrentUser(): Promise<void> {
     await clearCachedUserProfile();
     await signOut(auth);
   } catch (error) {
-    throw new Error(
-      getFriendlyAuthErrorMessage(error, 'Falha ao encerrar a sessao.')
-    );
+    throw new Error(getFriendlyAuthErrorMessage(error, AUTH_SIGN_OUT_FAILED));
   }
 }
 
@@ -259,7 +274,7 @@ export async function deactivateCurrentUserAccount(): Promise<void> {
   const currentUser = auth.currentUser;
 
   if (!currentUser) {
-    throw new Error('Usuario logado nao encontrado.');
+    throw new Error(AUTH_USER_NOT_FOUND);
   }
 
   try {
@@ -271,8 +286,6 @@ export async function deactivateCurrentUserAccount(): Promise<void> {
 
     await signOutCurrentUser();
   } catch (error) {
-    throw new Error(
-      getFriendlyAuthErrorMessage(error, 'Falha ao desativar a conta.')
-    );
+    throw new Error(getFriendlyAuthErrorMessage(error, AUTH_DEACTIVATE_FAILED));
   }
 }

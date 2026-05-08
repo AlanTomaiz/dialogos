@@ -14,6 +14,10 @@ import {
   View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  AUTH_DEACTIVATE_FAILED,
+  AUTH_SIGN_OUT_FAILED
+} from '../../config/messages';
 import { useLoggedUserProfile } from '../../hooks/useLoggedUserProfile';
 import { useToast } from '../../hooks/useToast';
 import {
@@ -43,7 +47,7 @@ export function Profile({ onBack }: ProfileProps) {
       await signOutCurrentUser();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Falha ao encerrar a sessao.';
+        error instanceof Error ? error.message : AUTH_SIGN_OUT_FAILED;
 
       toast.show(message, 'error');
     } finally {
@@ -57,7 +61,7 @@ export function Profile({ onBack }: ProfileProps) {
       await deactivateCurrentUserAccount();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Falha ao desativar a conta.';
+        error instanceof Error ? error.message : AUTH_DEACTIVATE_FAILED;
 
       toast.show(message, 'error');
     } finally {

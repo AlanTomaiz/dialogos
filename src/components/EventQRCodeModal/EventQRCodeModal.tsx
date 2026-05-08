@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Modal, Text, TouchableOpacity, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { EVENT_QR_CODE_LOAD_FAILED } from '../../config/messages';
 import { Colors } from '../../theme';
 import { buildQRCodeValue, shareEventQRCode } from './EventQRCodeModal.action';
 import type { EventQRCodeModalProps } from './EventQRCodeModal.type';
@@ -39,9 +40,7 @@ export function EventQRCodeModal({
         }
 
         const message =
-          error instanceof Error
-            ? error.message
-            : 'Falha ao carregar QR Code do evento.';
+          error instanceof Error ? error.message : EVENT_QR_CODE_LOAD_FAILED;
 
         onLoadError(message);
       });

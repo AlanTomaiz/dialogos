@@ -7,6 +7,11 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import {
+  AUTH_SIGN_IN_FAILED,
+  LOGIN_PROVIDE_CREDENTIALS,
+  LOGIN_SUCCESS
+} from '../../config/messages';
 import { useToast } from '../../hooks/useToast';
 import { signInWithRA } from '../../services/authService';
 import { Colors } from '../../theme';
@@ -27,18 +32,18 @@ export function Login({ onNavigateToSignUp, onLoginSuccess }: LoginProps) {
     const normalizedIdentifier = identifier.trim().toLowerCase();
 
     if (!normalizedIdentifier || !password.trim()) {
-      toast.show('Informe RA/e-mail e senha.', 'warning');
+      toast.show(LOGIN_PROVIDE_CREDENTIALS, 'warning');
       return;
     }
 
     try {
       setIsLoading(true);
       await signInWithRA(normalizedIdentifier, password);
-      toast.show('Login realizado com sucesso.', 'success');
+      toast.show(LOGIN_SUCCESS, 'success');
       onLoginSuccess();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Falha ao entrar.';
+        error instanceof Error ? error.message : AUTH_SIGN_IN_FAILED;
       toast.show(message, 'error');
     } finally {
       setIsLoading(false);

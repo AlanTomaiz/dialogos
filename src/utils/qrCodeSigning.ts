@@ -1,5 +1,11 @@
 import type { SignedQRCodePayload } from '../components/EventQRCodeModal/EventQRCodeModal.type';
 import {
+  QR_EXPIRED,
+  QR_INVALID,
+  QR_INVALID_SIGNATURE,
+  QR_UNSUPPORTED_VERSION
+} from '../config/messages';
+import {
   QR_CODE_TTL_MS,
   QR_PAYLOAD_VERSION,
   QR_SIGNING_SECRET
@@ -59,7 +65,7 @@ export async function verifyQRPayload(raw: string): Promise<VerifyResult> {
   try {
     parsed = JSON.parse(raw);
   } catch {
-    return { valid: false, error: 'QR Code inválido.' };
+    return { valid: false, error: QR_INVALID };
   }
 
   if (
@@ -70,7 +76,7 @@ export async function verifyQRPayload(raw: string): Promise<VerifyResult> {
     !('exp' in parsed) ||
     !('sig' in parsed)
   ) {
-    return { valid: false, error: 'QR Code inválido.' };
+    return { valid: false, error: QR_INVALID };
   }
 
   const { v, eventId, exp, sig } = parsed as Record<string, unknown>;
@@ -81,11 +87,11 @@ export async function verifyQRPayload(raw: string): Promise<VerifyResult> {
     typeof exp !== 'number' ||
     typeof sig !== 'string'
   ) {
-    return { valid: false, error: 'QR Code inválido ou versão não suportada.' };
+    return { valid: false, error: QR_UNSUPPORTED_VERSION };
   }
 
   if (Date.now() > exp) {
-    return { valid: false, error: 'QR Code expirado.' };
+    return { valid: false, error: QR_EXPIRED };
   }
 
   const expectedSig = await hmacSha256Hex(
@@ -94,7 +100,7 @@ export async function verifyQRPayload(raw: string): Promise<VerifyResult> {
   );
 
   if (sig !== expectedSig) {
-    return { valid: false, error: 'QR Code com assinatura inválida.' };
+    return { valid: false, error: QR_INVALID_SIGNATURE };
   }
 
   return { valid: true, eventId };

@@ -14,6 +14,19 @@ import {
   QRCodeScannerScreen,
   type QRCodeScanResult
 } from '../../components/QRCodeScannerScreen/QRCodeScannerScreen';
+import {
+  CHECKIN_EVENT_NOT_FOUND,
+  CHECKIN_PRESENCE_ALREADY,
+  CHECKIN_PRESENCE_CONFIRMED,
+  CHECKIN_QR_PROCESS_FAILED,
+  CHECKIN_QR_WRONG_EVENT,
+  EVENT_ADMIN_ONLY_CREATE,
+  EVENT_CREATE_FAILED,
+  EVENT_CREATED_SUCCESS,
+  EVENT_LOAD_FAILED,
+  EVENT_PRESENTER_ONLY_QR_CODE,
+  EVENT_USER_NOT_IDENTIFIED
+} from '../../config/messages';
 import { MODAL_NAMESPACE } from '../../config/modals';
 import { useDialEvents } from '../../hooks/useDialEvents';
 import { useEventAvailability } from '../../hooks/useEventAvailability';
@@ -60,7 +73,7 @@ export function Home({ onNavigateToProfile }: HomeProps) {
   const isAdmin = loggedUserRole === 'ADMIN';
 
   const handleEventsLoadError = useCallback(() => {
-    toast.show('Falha ao carregar eventos do Firebase.', 'error');
+    toast.show(EVENT_LOAD_FAILED, 'error');
   }, [toast]);
 
   const {
@@ -110,10 +123,7 @@ export function Home({ onNavigateToProfile }: HomeProps) {
       !isAdmin ||
       selectedEvent.creatorUid !== loggedUserUid
     ) {
-      toast.show(
-        'Somente administradores criadores do evento podem apresentar o QR Code.',
-        'error'
-      );
+      toast.show(EVENT_PRESENTER_ONLY_QR_CODE, 'error');
       return;
     }
 
@@ -125,7 +135,7 @@ export function Home({ onNavigateToProfile }: HomeProps) {
   async function handleScanned(rawValue: string): Promise<QRCodeScanResult> {
     try {
       if (!scannerEventId) {
-        const message = 'Evento para check-in nao encontrado.';
+        const message = CHECKIN_EVENT_NOT_FOUND;
         toast.show(message, 'error');
         return { success: false, message };
       }
@@ -138,7 +148,7 @@ export function Home({ onNavigateToProfile }: HomeProps) {
       }
 
       if (verification.eventId !== scannerEventId) {
-        const message = 'QR Code pertence a outro evento.';
+        const message = CHECKIN_QR_WRONG_EVENT;
         toast.show(message, 'error');
         return { success: false, message };
       }
@@ -151,8 +161,8 @@ export function Home({ onNavigateToProfile }: HomeProps) {
       }
 
       const message = result.alreadyRegistered
-        ? 'Presença já registrada.'
-        : 'Presença confirmada!';
+        ? CHECKIN_PRESENCE_ALREADY
+        : CHECKIN_PRESENCE_CONFIRMED;
 
       if (result.alreadyRegistered) {
         toast.show(message, 'success');
@@ -167,7 +177,7 @@ export function Home({ onNavigateToProfile }: HomeProps) {
       const message =
         error instanceof Error && error.message
           ? error.message
-          : 'Falha ao processar o QR Code para check-in.';
+          : CHECKIN_QR_PROCESS_FAILED;
 
       toast.show(message, 'error');
       return { success: false, message };
@@ -176,7 +186,7 @@ export function Home({ onNavigateToProfile }: HomeProps) {
 
   async function handleCreateEvent(input: EventCreateInput): Promise<void> {
     if (!isAdmin) {
-      toast.show('Apenas administradores podem criar eventos.', 'error');
+      toast.show(EVENT_ADMIN_ONLY_CREATE, 'error');
       return;
     }
 
@@ -188,7 +198,7 @@ export function Home({ onNavigateToProfile }: HomeProps) {
     }
 
     if (!loggedUserUid) {
-      toast.show('Usuario logado nao identificado.', 'error');
+      toast.show(EVENT_USER_NOT_IDENTIFIED, 'error');
       return;
     }
 
@@ -204,16 +214,14 @@ export function Home({ onNavigateToProfile }: HomeProps) {
         description: input.description.trim()
       });
 
-      toast.show('Evento criado com sucesso.', 'success');
+      toast.show(EVENT_CREATED_SUCCESS, 'success');
       broadcastNewEventNotification(input.title.trim()).catch(() => {});
       closeModal(MODAL_NAMESPACE.EVENT_CREATE);
       setQrCodeEvent({ id: eventId, title: input.title.trim() });
       openModal(MODAL_NAMESPACE.EVENT_QR_CODE);
     } catch (error) {
       const message =
-        error instanceof Error
-          ? error.message
-          : 'Falha ao criar evento no Firebase.';
+        error instanceof Error ? error.message : EVENT_CREATE_FAILED;
 
       toast.show(message, 'error');
     }

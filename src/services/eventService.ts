@@ -1,5 +1,12 @@
 import type { EventData } from '../components/EventCard/EventCard';
 import {
+  EVENT_ADMIN_ONLY_QR_CODE,
+  EVENT_CREATOR_ONLY_QR_CODE,
+  EVENT_NOT_FOUND,
+  EVENT_QR_CODE_PERMISSION_DENIED,
+  EVENT_USER_NOT_IDENTIFIED
+} from '../config/messages';
+import {
   collection,
   collectionGroup,
   doc,
@@ -319,11 +326,11 @@ export async function getOrCreateEventQRCodePayload(
   const { eventId, requesterUid, requesterRole } = input;
 
   if (!requesterUid) {
-    throw new Error('Usuario logado nao identificado.');
+    throw new Error(EVENT_USER_NOT_IDENTIFIED);
   }
 
   if (requesterRole !== 'ADMIN') {
-    throw new Error('Apenas administradores podem apresentar o QR Code.');
+    throw new Error(EVENT_ADMIN_ONLY_QR_CODE);
   }
 
   try {
@@ -331,16 +338,14 @@ export async function getOrCreateEventQRCodePayload(
     const eventSnap = await getDoc(eventRef);
 
     if (!eventSnap.exists()) {
-      throw new Error('Evento não encontrado.');
+      throw new Error(EVENT_NOT_FOUND);
     }
 
     const eventData = eventSnap.data() as DialEventDoc;
     const creatorUid = eventData.creatorUid?.trim();
 
     if (!creatorUid || creatorUid !== requesterUid) {
-      throw new Error(
-        'Somente o administrador criador do evento pode apresentar o QR Code.'
-      );
+      throw new Error(EVENT_CREATOR_ONLY_QR_CODE);
     }
 
     const existingPayload =
@@ -363,9 +368,7 @@ export async function getOrCreateEventQRCodePayload(
     return qrPayload;
   } catch (error: unknown) {
     if (isPermissionDeniedError(error)) {
-      throw new Error(
-        'Sem permissão para acessar ou atualizar o QR Code deste evento.'
-      );
+      throw new Error(EVENT_QR_CODE_PERMISSION_DENIED);
     }
 
     throw error;

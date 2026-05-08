@@ -2,6 +2,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useEffect, useRef, useState } from 'react';
 import { Modal, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { CHECKIN_QR_READ_FAILED } from '../../config/messages';
 import { styles } from './style';
 
 export type QRCodeScanResult = {
@@ -76,7 +77,7 @@ export function QRCodeScannerScreen({
     } catch {
       setScanResult({
         success: false,
-        message: 'Falha ao processar leitura do QR Code.'
+        message: CHECKIN_QR_READ_FAILED
       });
       hasScanned.current = false;
     }
