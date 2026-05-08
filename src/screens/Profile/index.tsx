@@ -3,7 +3,8 @@ import {
   ChevronRight,
   LogOut,
   Settings,
-  Trash2
+  Trash2,
+  Users as UsersIcon
 } from 'lucide-react-native';
 import { useState } from 'react';
 import {
@@ -30,9 +31,10 @@ import { styles } from './style';
 
 type ProfileProps = {
   onBack: () => void;
+  onNavigateToUsers?: () => void;
 };
 
-export function Profile({ onBack }: ProfileProps) {
+export function Profile({ onBack, onNavigateToUsers }: ProfileProps) {
   const insets = useSafeAreaInsets();
   const toast = useToast();
   const { fullName, photoURL, role } = useLoggedUserProfile();
@@ -113,6 +115,30 @@ export function Profile({ onBack }: ProfileProps) {
         </View>
 
         <View style={styles.menuCard}>
+          {role === 'ADMIN' && (
+            <>
+              <TouchableOpacity
+                style={styles.menuRow}
+                onPress={onNavigateToUsers}
+                disabled={isSigningOut || isDeletingAccount}
+                accessibilityLabel="Gerenciar usuários"
+                accessibilityRole="button"
+              >
+                <View style={styles.menuRowLeft}>
+                  <UsersIcon
+                    size={18}
+                    color={Colors.SECONDARY}
+                    strokeWidth={2}
+                  />
+                  <Text style={styles.menuText}>Gerenciar Usuários</Text>
+                </View>
+                <ChevronRight size={18} color={Colors.MUTED} />
+              </TouchableOpacity>
+
+              <View style={styles.menuDivider} />
+            </>
+          )}
+
           <TouchableOpacity
             style={styles.menuRow}
             onPress={handleSignOut}

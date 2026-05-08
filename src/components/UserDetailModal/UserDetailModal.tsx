@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { auth } from '../../libs/firebase';
+import { formatRA } from '../../utils/formatRA';
 import { getInitialsFromName } from '../../utils/getInitialsFromName';
 import { toggleUserStatus } from './UserDetailModal.action';
 import type { UserDetailModalProps } from './UserDetailModal.type';
@@ -83,7 +84,7 @@ export function UserDetailModal({
           <View style={styles.infoSection}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>RA</Text>
-              <Text style={styles.infoValue}>{user.ra}</Text>
+              <Text style={styles.infoValue}>{formatRA(user.ra)}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>E-mail</Text>

@@ -14,6 +14,7 @@ import type { UserStatus } from '../../services/authService';
 import { getAllUsers } from '../../services/userService';
 import type { DialUserPublic } from '../../services/userService.type';
 import { Colors } from '../../theme';
+import { formatRA } from '../../utils/formatRA';
 import { getInitialsFromName } from '../../utils/getInitialsFromName';
 import { styles } from './style';
 
@@ -67,7 +68,8 @@ export function Users({ onBack }: UsersProps) {
 
     return (
       <TouchableOpacity
-        style={styles.userCard}
+        style={[styles.userCard, !isActive && styles.userCardInactive]}
+        // disabled={!isActive}
         onPress={() => handleUserPress(item)}
         activeOpacity={0.7}
         accessibilityRole="button"
@@ -78,21 +80,7 @@ export function Users({ onBack }: UsersProps) {
         </View>
         <View style={styles.userInfo}>
           <Text style={styles.userName}>{item.fullName}</Text>
-          <Text style={styles.userEmail}>{item.email}</Text>
-        </View>
-        <View
-          style={[
-            styles.statusBadge,
-            isActive ? styles.statusActive : styles.statusInactive
-          ]}
-        >
-          <Text
-            style={
-              isActive ? styles.statusActiveText : styles.statusInactiveText
-            }
-          >
-            {isActive ? 'Ativo' : 'Inativo'}
-          </Text>
+          <Text style={styles.userInfoText}>{formatRA(item.ra)}</Text>
         </View>
       </TouchableOpacity>
     );

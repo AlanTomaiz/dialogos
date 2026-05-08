@@ -91,8 +91,8 @@ export function EventParticipantsModal({
                     </View>
                     <View style={styles.participantInfo}>
                       <Text style={styles.participantName}>{name}</Text>
-                      {timeLabel ? (
-                        <Text style={styles.participantTime}>{timeLabel}</Text>
+                      {item.ra ? (
+                        <Text style={styles.participantTime}>{item.ra}</Text>
                       ) : null}
                     </View>
                   </View>

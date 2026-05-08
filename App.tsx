@@ -12,9 +12,10 @@ import { Home } from './src/screens/Home';
 import { Login } from './src/screens/Login';
 import { Profile } from './src/screens/Profile';
 import { SignUp } from './src/screens/SignUp';
+import { Users } from './src/screens/Users';
 import { getUserStatusByUid } from './src/services/authService';
 
-type AppScreen = 'login' | 'signup' | 'home' | 'profile';
+type AppScreen = 'login' | 'signup' | 'home' | 'profile' | 'users';
 
 function GlobalToastLayer() {
   const toast = useToast();
@@ -68,7 +69,12 @@ function AppContent({ fontsLoaded }: AppContentProps) {
       {currentScreen === 'home' ? (
         <Home onNavigateToProfile={() => setCurrentScreen('profile')} />
       ) : currentScreen === 'profile' ? (
-        <Profile onBack={() => setCurrentScreen('home')} />
+        <Profile
+          onBack={() => setCurrentScreen('home')}
+          onNavigateToUsers={() => setCurrentScreen('users')}
+        />
+      ) : currentScreen === 'users' ? (
+        <Users onBack={() => setCurrentScreen('home')} />
       ) : currentScreen === 'login' ? (
         <Login
           onNavigateToSignUp={() => setCurrentScreen('signup')}

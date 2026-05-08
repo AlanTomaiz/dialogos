@@ -326,7 +326,7 @@ export function Home({ onNavigateToProfile }: HomeProps) {
           canPresentSelectedEventQRCode ||
           (!isSelectedEventChecked && isSelectedEventAvailable)
         }
-        onViewParticipants={handleViewParticipants}
+        onViewParticipants={isAdmin ? handleViewParticipants : undefined}
       />
 
       <QRCodeScannerScreen

@@ -44,6 +44,9 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.BORDER
   },
+  userCardInactive: {
+    opacity: 0.4
+  },
   avatar: {
     width: 44,
     height: 44,
@@ -63,36 +66,14 @@ export const styles = StyleSheet.create({
   },
   userName: {
     fontFamily: Typography.family.semiBold,
-    fontSize: Typography.size.base,
+    fontSize: Typography.size.sm,
     color: Colors.TITLE
   },
-  userEmail: {
+  userInfoText: {
     fontFamily: Typography.family.regular,
-    fontSize: Typography.size.sm,
+    fontSize: Typography.size.xs,
     color: Colors.MUTED,
     marginTop: Spacing.xxs
-  },
-  statusBadge: {
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xxs,
-    borderRadius: Radius.full,
-    flexShrink: 0
-  },
-  statusActive: {
-    backgroundColor: Colors.SUCCESS_BG
-  },
-  statusInactive: {
-    backgroundColor: '#FEE2E2'
-  },
-  statusActiveText: {
-    fontFamily: Typography.family.semiBold,
-    fontSize: Typography.size.xs,
-    color: Colors.SUCCESS_TEXT
-  },
-  statusInactiveText: {
-    fontFamily: Typography.family.semiBold,
-    fontSize: Typography.size.xs,
-    color: '#991B1B'
   },
   loader: {
     flex: 1,

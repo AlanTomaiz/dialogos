@@ -214,6 +214,7 @@ export async function registerParticipant(
 export type ParticipantData = {
   uid: string;
   fullName: string | null;
+  ra: string | null;
   joinedAt: Date | null;
 };
 
@@ -229,33 +230,36 @@ export async function getEventParticipants(
     return {
       uid: data.uid as string,
       fullName: (data.fullName as string | null) ?? null,
+      ra: null as string | null,
       joinedAt: data.joinedAt?.toDate?.() ?? null
     };
   });
 
   const missing = participants.filter((p) => !p.fullName);
 
-  if (missing.length > 0) {
-    const userSnaps = await Promise.allSettled(
-      missing.map((p) => getDoc(doc(firestore, 'dial_users', p.uid)))
-    );
+  const allUserSnaps = await Promise.allSettled(
+    participants.map((p) => getDoc(doc(firestore, 'dial_users', p.uid)))
+  );
 
-    const nameByUid = new Map<string, string>();
-    userSnaps.forEach((result, index) => {
-      if (result.status === 'fulfilled' && result.value.exists()) {
-        const name = (result.value.data() as { fullName?: string }).fullName;
-        if (name) {
-          nameByUid.set(missing[index].uid, name);
-        }
-      }
-    });
+  const profileByUid = new Map<string, { fullName?: string; ra?: string }>();
+  allUserSnaps.forEach((result, index) => {
+    if (result.status === 'fulfilled' && result.value.exists()) {
+      const data = result.value.data() as {
+        fullName?: string;
+        ra?: string;
+      };
+      profileByUid.set(participants[index].uid, data);
+    }
+  });
 
-    return participants.map((p) =>
-      p.fullName ? p : { ...p, fullName: nameByUid.get(p.uid) ?? null }
-    );
-  }
-
-  return participants;
+  return participants.map((p) => {
+    const profile = profileByUid.get(p.uid);
+    return {
+      ...p,
+      fullName: p.fullName ?? profile?.fullName ?? null,
+      ra: profile?.ra ?? null
+    };
+  });
 }
 
 export async function getUserCheckedEventIds(uid: string): Promise<string[]> {
