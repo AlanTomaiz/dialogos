@@ -215,6 +215,7 @@ export type ParticipantData = {
   uid: string;
   fullName: string | null;
   ra: string | null;
+  email: string | null;
   joinedAt: Date | null;
 };
 
@@ -230,36 +231,47 @@ export async function getEventParticipants(
     return {
       uid: data.uid as string,
       fullName: (data.fullName as string | null) ?? null,
+      email: (data.email as string | null) ?? null,
       ra: null as string | null,
       joinedAt: data.joinedAt?.toDate?.() ?? null
     };
   });
 
-  const missing = participants.filter((p) => !p.fullName);
-
   const allUserSnaps = await Promise.allSettled(
     participants.map((p) => getDoc(doc(firestore, 'dial_users', p.uid)))
   );
 
-  const profileByUid = new Map<string, { fullName?: string; ra?: string }>();
+  const profileByUid = new Map<
+    string,
+    { fullName?: string; ra?: string; email?: string }
+  >();
+
   allUserSnaps.forEach((result, index) => {
     if (result.status === 'fulfilled' && result.value.exists()) {
       const data = result.value.data() as {
         fullName?: string;
         ra?: string;
+        email?: string;
       };
       profileByUid.set(participants[index].uid, data);
     }
   });
 
-  return participants.map((p) => {
-    const profile = profileByUid.get(p.uid);
-    return {
-      ...p,
-      fullName: p.fullName ?? profile?.fullName ?? null,
-      ra: profile?.ra ?? null
-    };
-  });
+  return participants
+    .map((p) => {
+      const profile = profileByUid.get(p.uid);
+      return {
+        ...p,
+        fullName: p.fullName ?? profile?.fullName ?? null,
+        ra: profile?.ra ?? null,
+        email: profile?.email ?? null
+      };
+    })
+    .sort((a, b) => {
+      const nameA = a.fullName ?? a.email ?? a.uid;
+      const nameB = b.fullName ?? b.email ?? b.uid;
+      return nameA.localeCompare(nameB);
+    });
 }
 
 export async function getUserCheckedEventIds(uid: string): Promise<string[]> {

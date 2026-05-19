@@ -9,9 +9,13 @@ import {
   View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useLoggedUserProfile } from '../../hooks/useLoggedUserProfile';
 import type { ParticipantData } from '../../services/eventService';
 import { Colors } from '../../theme';
-import { formatRelativeDate } from '../../utils/formatRelativeDate';
+import {
+  ExportParticipant,
+  exportParticipantsToXLSX
+} from '../../utils/exportXlsxEvent';
 import { getInitialsFromName } from '../../utils/getInitialsFromName';
 import { styles } from './style';
 
@@ -29,8 +33,33 @@ export function EventParticipantsModal({
   fetchParticipants
 }: EventParticipantsModalProps) {
   const insets = useSafeAreaInsets();
+  const { role } = useLoggedUserProfile();
   const [participants, setParticipants] = useState<ParticipantData[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Exportação XLSX
+  function handleExport() {
+    const exportList: ExportParticipant[] = participants.map((p) => ({
+      name: p.fullName ?? '',
+      ra: p.ra ?? '',
+      email: '' // Email não está presente em ParticipantData, ajustar se necessário
+    }));
+
+    const blob = exportParticipantsToXLSX(exportList);
+
+    // Download para web
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `participantes_${eventTitle.replace(/\s+/g, '_')}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+  }
 
   useEffect(() => {
     if (!visible) return;
@@ -63,6 +92,16 @@ export function EventParticipantsModal({
             <Text style={styles.headerSubtitle} numberOfLines={1}>
               {eventTitle}
             </Text>
+            {role === 'ADMIN' && participants.length > 0 && (
+              <TouchableOpacity
+                style={{ marginLeft: 12 }}
+                onPress={handleExport}
+              >
+                <Text style={{ color: Colors.PRIMARY, fontWeight: 'bold' }}>
+                  Exportar XLSX
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           {loading ? (
@@ -80,9 +119,6 @@ export function EventParticipantsModal({
               renderItem={({ item }) => {
                 const name = item.fullName ?? 'Usuário';
                 const initials = getInitialsFromName(name);
-                const timeLabel = item.joinedAt
-                  ? formatRelativeDate(item.joinedAt.toISOString())
-                  : '';
 
                 return (
                   <View style={styles.participantRow}>
