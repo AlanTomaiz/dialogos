@@ -10,12 +10,10 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLoggedUserProfile } from '../../hooks/useLoggedUserProfile';
+import { useToast } from '../../hooks/useToast';
 import type { ParticipantData } from '../../services/eventService';
 import { Colors } from '../../theme';
-import {
-  ExportParticipant,
-  exportParticipantsToXLSX
-} from '../../utils/exportXlsxEvent';
+import { exportParticipantsToXLSX } from '../../utils/exportXlsxEvent';
 import { getInitialsFromName } from '../../utils/getInitialsFromName';
 import { styles } from './style';
 
@@ -34,31 +32,32 @@ export function EventParticipantsModal({
 }: EventParticipantsModalProps) {
   const insets = useSafeAreaInsets();
   const { role } = useLoggedUserProfile();
+  const toast = useToast();
+
   const [participants, setParticipants] = useState<ParticipantData[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Exportação XLSX
-  function handleExport() {
-    const exportList: ExportParticipant[] = participants.map((p) => ({
-      name: p.fullName ?? '',
-      ra: p.ra ?? '',
-      email: '' // Email não está presente em ParticipantData, ajustar se necessário
-    }));
+  // Exportação para Google Drive
+  async function handleExportToGoogleDrive() {
+    try {
+      const exportList = participants.map((p) => ({
+        Nome: p.fullName ?? 'Usuário sem nome',
+        RA: p.ra ?? 'Sem RA',
+        Email: p.email ?? 'Sem e-mail'
+      }));
 
-    const blob = exportParticipantsToXLSX(exportList);
+      await exportParticipantsToXLSX(exportList);
 
-    // Download para web
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `participantes_${eventTitle.replace(/\s+/g, '_')}.xlsx`;
-    document.body.appendChild(a);
-    a.click();
-
-    setTimeout(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 100);
+      toast.show(
+        'Arquivo exportado para o Google Drive com sucesso!',
+        'success'
+      );
+    } catch (error) {
+      toast.show(
+        'Erro ao exportar para o Google Drive. Tente novamente.',
+        'error'
+      );
+    }
   }
 
   useEffect(() => {
@@ -88,15 +87,14 @@ export function EventParticipantsModal({
           <View style={styles.handle} />
 
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>Presenças</Text>
-            <Text style={styles.headerSubtitle} numberOfLines={1}>
-              {eventTitle}
-            </Text>
+            <View>
+              <Text style={styles.headerTitle}>Presenças</Text>
+              <Text style={styles.headerSubtitle} numberOfLines={1}>
+                {eventTitle}
+              </Text>
+            </View>
             {role === 'ADMIN' && participants.length > 0 && (
-              <TouchableOpacity
-                style={{ marginLeft: 12 }}
-                onPress={handleExport}
-              >
+              <TouchableOpacity onPress={handleExportToGoogleDrive}>
                 <Text style={{ color: Colors.PRIMARY, fontWeight: 'bold' }}>
                   Exportar XLSX
                 </Text>
